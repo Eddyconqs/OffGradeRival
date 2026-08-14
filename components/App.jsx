@@ -7,6 +7,7 @@ import { Sidebar, BottomNav, Fab } from "./Nav";
 import { Sun, Moon, LogOut } from "lucide-react";
 import { signOut } from "../lib/auth";
 import Auth from "./Auth";
+import Landing from "./Landing";
 import Dashboard from "./Dashboard";
 import Classes from "./Classes";
 import Social from "./Social";
@@ -58,13 +59,17 @@ function Shell() {
   const { loading: authLoading, session } = useAuth();
   const { mounted } = useStore();
   const [tab, setTab] = useState("dashboard");
+  const [showAuth, setShowAuth] = useState(false);
 
   if (authLoading) {
     return <div className="gr-boot">Loading Grade Arena…</div>;
   }
 
   if (!session) {
-    return <Auth />;
+    if (!showAuth) {
+      return <Landing onGetStarted={() => setShowAuth(true)} onLogin={() => setShowAuth(true)} />;
+    }
+    return <Auth onBack={() => setShowAuth(false)} />;
   }
 
   if (!mounted) {

@@ -4,15 +4,26 @@ import { useState } from "react";
 import { signUp, signIn, validateSignup } from "../lib/auth";
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 
-function Shell({ children }) {
+function Shell({ children, onBack }) {
   return (
     <div className="gr-onboard-wrap">
       <div className="gr-onboard-card">
         <div style={{ marginBottom: 28, textAlign: "center" }}>
-          <div className="gr-wordmark" style={{ justifyContent: "center" }}>
-            Grade<span className="accent">Arena</span>
-            <span className="dot" />
-          </div>
+          {onBack ? (
+            <button
+              className="gr-wordmark"
+              onClick={onBack}
+              style={{ justifyContent: "center", background: "none", border: "none", cursor: "pointer", margin: "0 auto" }}
+            >
+              Grade<span className="accent">Arena</span>
+              <span className="dot" />
+            </button>
+          ) : (
+            <div className="gr-wordmark" style={{ justifyContent: "center" }}>
+              Grade<span className="accent">Arena</span>
+              <span className="dot" />
+            </div>
+          )}
           <p className="gr-tagline">Compete. Improve. Celebrate.</p>
         </div>
         {children}
@@ -36,7 +47,7 @@ function NotConfigured() {
   );
 }
 
-export default function Auth() {
+export default function Auth({ onBack }) {
   const [mode, setMode] = useState("signup"); // "signup" | "login"
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
@@ -87,7 +98,7 @@ export default function Auth() {
   };
 
   return (
-    <Shell>
+    <Shell onBack={onBack}>
       <div className="gr-card">
         <div className="gr-auth-tabs">
           <button className={mode === "signup" ? "active" : ""} onClick={() => switchMode("signup")}>
