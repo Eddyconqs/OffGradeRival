@@ -165,7 +165,7 @@ function ClassCard({ klass }) {
           <h3>{klass.name}</h3>
           <span className="gr-tag">{klass.credits} cr</span>
           {totalWeight !== 100 && (
-            <span className="gr-tag" style={{ color: "var(--rival)", borderColor: "var(--rival)" }}>
+            <span className="gr-tag" style={{ color: "var(--coral)", borderColor: "var(--coral)" }}>
               weights sum to {totalWeight}%
             </span>
           )}

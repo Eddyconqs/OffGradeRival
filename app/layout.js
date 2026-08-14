@@ -1,9 +1,9 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "GradeRival — Compete for the GPA",
+  title: "Grade Arena — Compete. Improve. Celebrate.",
   description:
-    "Track weighted grades, project your GPA, race friends up the leaderboard, and level up by studying.",
+    "Track weighted grades, project your GPA, and opt in to friendly competition — on your terms, with grade privacy on by default.",
 };
 
 export default function RootLayout({ children }) {

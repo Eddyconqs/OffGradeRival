@@ -8,9 +8,12 @@ function Shell({ children }) {
   return (
     <div className="gr-onboard-wrap">
       <div className="gr-onboard-card">
-        <div className="gr-wordmark" style={{ marginBottom: 28, justifyContent: "center" }}>
-          Grade<span className="rival">Rival</span>
-          <span className="dot" />
+        <div style={{ marginBottom: 28, textAlign: "center" }}>
+          <div className="gr-wordmark" style={{ justifyContent: "center" }}>
+            Grade<span className="accent">Arena</span>
+            <span className="dot" />
+          </div>
+          <p className="gr-tagline">Compete. Improve. Celebrate.</p>
         </div>
         {children}
       </div>
@@ -69,7 +72,7 @@ export default function Auth() {
       if (!result.session) {
         // Account created, but Supabase didn't hand back a session — almost
         // always means "Confirm email" is still on for this project, and it
-        // can't confirm our synthetic @graderival.local address.
+        // can't confirm our synthetic @graderival.vercel.app address.
         setError(
           "Account created, but sign-in didn't complete. In your Supabase project, go to Authentication → Providers → Email and turn off \"Confirm email\", then try logging in."
         );

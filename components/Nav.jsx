@@ -28,9 +28,10 @@ export function Sidebar({ active, onChange }) {
     <aside className="gr-sidebar">
       <div className="gr-sidebar-logo">
         <div className="gr-wordmark">
-          Grade<span className="rival">Rival</span>
+          Grade<span className="accent">Arena</span>
           <span className="dot" />
         </div>
+        <p className="gr-tagline">Compete. Improve. Celebrate.</p>
       </div>
 
       <nav className="gr-sidebar-nav">

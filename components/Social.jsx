@@ -84,46 +84,56 @@ function FriendSearch({ friends, incomingRequests, outgoingRequests, onSend }) {
 }
 
 function Leaderboard({ friends, profile, gpa, levelInfo }) {
+  // Friends who haven't turned on "Share my GPA" show up unranked —
+  // their gpa comes back null from the store, never coerced to 0.
   const rows = useMemo(() => {
     const list = [
       { id: "you", name: profile.name || "You", gpa, level: levelInfo.level, you: true },
       ...friends.map((f) => ({ ...f, you: false })),
     ];
-    return list.sort((a, b) => b.gpa - a.gpa);
+    const ranked = list.filter((r) => r.gpa != null).sort((a, b) => b.gpa - a.gpa);
+    const hidden = list.filter((r) => r.gpa == null);
+    return [...ranked, ...hidden];
   }, [friends, profile.name, gpa, levelInfo.level]);
 
   const rankClass = (i) => (i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : "");
+  let rankCounter = 0;
 
   return (
     <div className="gr-card">
       <div className="gr-card-title">Leaderboard</div>
-      <p className="gr-card-sub">Ranked by GPA across your circle.</p>
-      {rows.map((r, i) => (
-        <div key={r.id} className={`gr-lb-row ${r.you ? "you" : ""}`}>
-          <div className={`gr-lb-rank ${rankClass(i)}`}>{i + 1}</div>
-          <div className="gr-lb-person">
-            <div
-              className="gr-avatar"
-              style={{
-                width: 28,
-                height: 28,
-                fontSize: 11,
-                background: r.you ? undefined : "var(--surface-elevated)",
-                color: r.you ? undefined : "var(--text)",
-              }}
-            >
-              {initials(r.name || "?")}
-            </div>
-            <div>
-              <div className="who">
-                {r.name} {r.you && <span style={{ color: "var(--gold-text)" }}>· you</span>}
+      <p className="gr-card-sub">Ranked by GPA across your circle — friends keeping theirs private show up unranked.</p>
+      {rows.map((r) => {
+        const isRanked = r.gpa != null;
+        if (isRanked) rankCounter += 1;
+        const i = rankCounter - 1;
+        return (
+          <div key={r.id} className={`gr-lb-row ${r.you ? "you" : ""}`}>
+            <div className={`gr-lb-rank ${isRanked ? rankClass(i) : ""}`}>{isRanked ? i + 1 : "–"}</div>
+            <div className="gr-lb-person">
+              <div
+                className="gr-avatar"
+                style={{
+                  width: 28,
+                  height: 28,
+                  fontSize: 11,
+                  background: r.you ? undefined : "var(--surface-elevated)",
+                  color: r.you ? undefined : "var(--text)",
+                }}
+              >
+                {initials(r.name || "?")}
               </div>
-              <div className="lvl">Lv. {r.level}</div>
+              <div>
+                <div className="who">
+                  {r.name} {r.you && <span style={{ color: "var(--gold-text)" }}>· you</span>}
+                </div>
+                <div className="lvl">Lv. {r.level}</div>
+              </div>
             </div>
+            <div className="gr-lb-gpa">{isRanked ? r.gpa.toFixed(2) : "🔒 Private"}</div>
           </div>
-          <div className="gr-lb-gpa">{r.gpa ? r.gpa.toFixed(2) : "—"}</div>
-        </div>
-      ))}
+        );
+      })}
       {rows.length === 1 && (
         <div className="gr-empty" style={{ marginTop: 10 }}>
           Add a rival to start a leaderboard.
@@ -605,6 +615,7 @@ export default function Social() {
     levelInfo,
     refreshFriends,
     refreshGroups,
+    toggleShareGpa,
   } = useStore();
   const { session } = useAuth();
   const myId = session?.user?.id;
@@ -630,7 +641,14 @@ export default function Social() {
         <div>
           <div className="gr-card" style={{ marginBottom: 18 }}>
             <div className="gr-card-title">Your rivals</div>
-            <p className="gr-card-sub">Compete for the highest GPA.</p>
+            <p className="gr-card-sub">Compete for the highest GPA — on your terms.</p>
+            <label className="gr-share-toggle">
+              <input type="checkbox" checked={profile.shareGpa} onChange={toggleShareGpa} />
+              <span>
+                Share my GPA with friends
+                <em>{profile.shareGpa ? "Friends can see your GPA." : "Your GPA stays private — nobody sees it."}</em>
+              </span>
+            </label>
             <FriendSearch
               friends={friends}
               incomingRequests={incomingRequests}
@@ -688,7 +706,7 @@ export default function Social() {
                     <span className="name">{f.name}</span>
                   </span>
                   <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span className="score">{f.gpa.toFixed(2)}</span>
+                    <span className="score">{f.gpa == null ? "🔒 Private" : f.gpa.toFixed(2)}</span>
                     <button className="gr-btn small ghost" onClick={() => removeFriendship(f.friendshipId)}>
                       ✕
                     </button>

@@ -32,7 +32,7 @@ function MobileTopbar() {
   return (
     <div className="gr-topbar">
       <div className="gr-wordmark">
-        Grade<span className="rival">Rival</span>
+        Grade<span className="accent">Arena</span>
         <span className="dot" />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -60,7 +60,7 @@ function Shell() {
   const [tab, setTab] = useState("dashboard");
 
   if (authLoading) {
-    return <div className="gr-boot">Loading GradeRival…</div>;
+    return <div className="gr-boot">Loading Grade Arena…</div>;
   }
 
   if (!session) {

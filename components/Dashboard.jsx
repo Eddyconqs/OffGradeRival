@@ -96,9 +96,10 @@ function GPAOrb({ gpa, standing }) {
   );
 }
 
-function MissionCard({ tone, icon: Icon, title, children }) {
+function MissionCard({ tone, icon: Icon, title, pillar, children }) {
   return (
     <div className="gr-card gr-mission-card">
+      {pillar && <span className={`gr-pillar-tag ${pillar}`}>{pillar}</span>}
       <div className={`gr-mission-head ${tone}`}>
         <Icon />
         {title}
@@ -259,7 +260,7 @@ function GradeInsightCard({ classes }) {
 
   if (!best) {
     return (
-      <MissionCard tone="violet" icon={Sparkles} title="Grade Insight">
+      <MissionCard tone="violet" icon={Sparkles} title="Grade Insight" pillar="improve">
         <div className="gr-empty" style={{ padding: "16px 10px" }}>
           <b>Log more scores</b>
           Once a class has some open weight left, you'll see the exact target needed for your next
@@ -272,7 +273,7 @@ function GradeInsightCard({ classes }) {
   const { klass, t } = best;
 
   return (
-    <MissionCard tone="violet" icon={Sparkles} title="Grade Insight">
+    <MissionCard tone="violet" icon={Sparkles} title="Grade Insight" pillar="improve">
       <p style={{ margin: "0 0 10px" }}>
         Average <b>{t.requiredAvg.toFixed(1)}%+</b> on the remaining {t.remainingWeight}% of{" "}
         <b>{klass.name}</b> to reach <b>{t.targetLetter}</b>.
@@ -301,7 +302,7 @@ function GradeInsightCard({ classes }) {
 function RivalryRadarCard({ friends, profile, gpa, onNavigate }) {
   if (!friends.length) {
     return (
-      <MissionCard tone="cyan" icon={Radar} title="Rivalry Radar">
+      <MissionCard tone="cyan" icon={Radar} title="Rivalry Radar" pillar="compete">
         <div className="gr-empty" style={{ padding: "16px 10px" }}>
           <b>No rivals yet</b>
           Add a friend in Groups to start a friendly GPA race.
@@ -310,7 +311,25 @@ function RivalryRadarCard({ friends, profile, gpa, onNavigate }) {
     );
   }
 
-  const closest = [...friends].sort((a, b) => Math.abs(a.gpa - gpa) - Math.abs(b.gpa - gpa))[0];
+  // Only friends who've opted in to sharing can be compared against —
+  // grades are private by default.
+  const comparable = friends.filter((f) => f.gpa != null);
+  if (!comparable.length) {
+    return (
+      <MissionCard tone="cyan" icon={Radar} title="Rivalry Radar" pillar="compete">
+        <div className="gr-empty" style={{ padding: "16px 10px" }}>
+          <b>Nobody's sharing yet</b>
+          Your friends keep their GPA private by default. Once one of you turns on "Share my GPA"
+          in Groups, you'll see a head-to-head here.
+        </div>
+        <button className="gr-btn small ghost" style={{ marginTop: 10 }} onClick={() => onNavigate("social")}>
+          Open Groups
+        </button>
+      </MissionCard>
+    );
+  }
+
+  const closest = [...comparable].sort((a, b) => Math.abs(a.gpa - gpa) - Math.abs(b.gpa - gpa))[0];
   const delta = gpa - closest.gpa;
   const ahead = delta >= 0;
   const Arrow = Math.abs(delta) < 0.01 ? Minus : ahead ? ArrowUpRight : ArrowDownRight;
@@ -319,7 +338,7 @@ function RivalryRadarCard({ friends, profile, gpa, onNavigate }) {
   const rivalPct = Math.max(4, Math.min(96, (closest.gpa / MAX_GPA) * 100));
 
   return (
-    <MissionCard tone="cyan" icon={Radar} title="Rivalry Radar">
+    <MissionCard tone="cyan" icon={Radar} title="Rivalry Radar" pillar="compete">
       <div className="gr-rivalry-pair">
         <div className="gr-rivalry-side">
           <div className="who">{profile.name || "You"}</div>
@@ -404,8 +423,10 @@ export default function Dashboard({ onNavigate }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Only ranked against friends who've opted in to sharing their GPA.
+  const comparableFriends = friends.filter((f) => f.gpa != null);
   const rank =
-    [...friends, { id: "you", gpa }].sort((a, b) => b.gpa - a.gpa).findIndex((p) => p.id === "you") + 1;
+    [...comparableFriends, { id: "you", gpa }].sort((a, b) => b.gpa - a.gpa).findIndex((p) => p.id === "you") + 1;
 
   const gradedClasses = perClass.filter((p) => p.pct != null);
   const bestClass = gradedClasses.length
@@ -430,7 +451,8 @@ export default function Dashboard({ onNavigate }) {
           <div className="gr-hero-copy">
             <p className="eyebrow">Good to see you{profile.name ? `, ${profile.name}` : ""}</p>
             <h1>
-              You're rank #{friends.length ? rank : 1} out of {friends.length + 1} in your circle.
+              You're rank #{comparableFriends.length ? rank : 1} out of {comparableFriends.length + 1} in
+              your circle.
             </h1>
             <p>
               {gradedClasses.length
@@ -449,6 +471,7 @@ export default function Dashboard({ onNavigate }) {
         </div>
 
         <div className="gr-card gr-level-card">
+          <span className="gr-pillar-tag celebrate">celebrate</span>
           <div className="gr-level-top">
             <div>
               <div className="gr-level-badge">

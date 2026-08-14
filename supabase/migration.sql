@@ -1,11 +1,19 @@
--- GradeRival — multi-user backend migration
+-- Grade Arena — multi-user backend migration
 -- Run this once in the Supabase SQL Editor (Project -> SQL Editor -> New query).
 -- Safe to run on a fresh project; not written to be re-run on top of itself.
+-- (Internal domain/table names still say "graderival" in a few places —
+-- that's the real infrastructure hostname, not the brand, and renaming it
+-- would break existing accounts' login emails. See lib/auth.js.)
 
 create extension if not exists "pgcrypto";
 
 -- ============================================================
--- profiles — one row per account, auto-created at signup
+-- profiles — one row per account, auto-created at signup.
+-- Grades are private by default: full_name is always readable (needed to
+-- search for someone to send a friend request), but gpa/xp are only
+-- visible on your own row, or on a friend's row once THEY'VE opted in via
+-- share_gpa. Other code must query the public_profiles view below to look
+-- up anyone but themselves — this base table's RLS is owner-only.
 -- ============================================================
 
 create table public.profiles (
@@ -13,15 +21,16 @@ create table public.profiles (
   full_name text not null,
   xp int not null default 0,
   gpa numeric not null default 0,
+  share_gpa boolean not null default false,
   created_at timestamptz not null default now()
 );
 
 alter table public.profiles enable row level security;
 
-create policy "profiles are readable by any signed-in user"
+create policy "users can read their own full profile"
   on public.profiles for select
   to authenticated
-  using (true);
+  using (id = auth.uid());
 
 create policy "users can update their own profile"
   on public.profiles for update
@@ -29,11 +38,14 @@ create policy "users can update their own profile"
   using (id = auth.uid())
   with check (id = auth.uid());
 
--- Only xp/gpa are writable by the client — full_name is the login
--- identifier (derived into the synthetic email in lib/auth.js) and must
--- not drift from what was set at signup.
+-- Only xp/gpa/share_gpa are writable by the client — full_name is the
+-- login identifier (derived into the synthetic email in lib/auth.js) and
+-- must not drift from what was set at signup.
 revoke update on public.profiles from authenticated;
-grant update (xp, gpa) on public.profiles to authenticated;
+grant update (xp, gpa, share_gpa) on public.profiles to authenticated;
+
+-- public_profiles view is created further down, once the friendships
+-- table it depends on exists (see "public directory view" section).
 
 create function public.handle_new_user()
 returns trigger
@@ -175,6 +187,45 @@ create policy "addressee can accept" on public.friendships for update
 create policy "either side can remove" on public.friendships for delete
   to authenticated
   using (requester_id = auth.uid() or addressee_id = auth.uid());
+
+-- ============================================================
+-- public directory view — the only sanctioned way to look up anyone
+-- but yourself. Runs as the view owner (bypasses profiles' owner-only
+-- RLS) so it can see every row internally, then decides per-column what
+-- the calling user is actually allowed to see: full_name is always
+-- visible (needed to find someone to send a friend request to before any
+-- friendship exists); gpa/xp are only visible on your own row, or on a
+-- friend's row once THEY'VE turned share_gpa on.
+-- ============================================================
+
+create view public.public_profiles as
+select
+  p.id,
+  p.full_name,
+  case
+    when p.id = auth.uid() then p.xp
+    when p.share_gpa and exists (
+      select 1 from public.friendships f
+      where f.status = 'accepted'
+        and ((f.requester_id = auth.uid() and f.addressee_id = p.id)
+          or (f.addressee_id = auth.uid() and f.requester_id = p.id))
+    ) then p.xp
+    else null
+  end as xp,
+  case
+    when p.id = auth.uid() then p.gpa
+    when p.share_gpa and exists (
+      select 1 from public.friendships f
+      where f.status = 'accepted'
+        and ((f.requester_id = auth.uid() and f.addressee_id = p.id)
+          or (f.addressee_id = auth.uid() and f.requester_id = p.id))
+    ) then p.gpa
+    else null
+  end as gpa,
+  p.share_gpa
+from public.profiles p;
+
+grant select on public.public_profiles to authenticated;
 
 -- ============================================================
 -- groups — real shared spaces

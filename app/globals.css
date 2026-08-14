@@ -44,7 +44,6 @@
   --paper-dim: var(--text-muted);
   --ink-text: var(--text);
   --muted: var(--text-muted);
-  --rival: var(--coral);
 
   /* --- type --- */
   --display: "Space Grotesk", "Inter", -apple-system, sans-serif;
@@ -320,7 +319,7 @@ button {
   letter-spacing: -0.01em;
 }
 
-.gr-wordmark .rival {
+.gr-wordmark .accent {
   color: var(--cyan);
   font-weight: 600;
 }
@@ -331,6 +330,15 @@ button {
   border-radius: 50%;
   background: var(--mint);
   box-shadow: 0 0 0 4px rgba(77, 255, 181, 0.15);
+}
+
+.gr-tagline {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .gr-profile-chip {
@@ -708,6 +716,42 @@ button {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+}
+
+.gr-pillar-tag {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+}
+
+.gr-pillar-tag.compete {
+  color: var(--violet-text);
+  border-color: rgba(139, 92, 255, 0.35);
+}
+
+.gr-pillar-tag.improve {
+  color: var(--cyan-text);
+  border-color: rgba(59, 231, 255, 0.35);
+}
+
+.gr-pillar-tag.celebrate {
+  color: var(--gold-text);
+  border-color: rgba(255, 200, 87, 0.4);
+}
+
+.gr-level-card .gr-pillar-tag.celebrate {
+  position: static;
+  display: inline-block;
+  margin-bottom: 10px;
 }
 
 .gr-mission-card:hover {
@@ -1212,6 +1256,41 @@ a:focus-visible {
 .gr-reminder-check span.done {
   color: var(--text-muted);
   text-decoration: line-through;
+}
+
+.gr-share-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.gr-share-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cyan);
+  flex: none;
+}
+
+.gr-share-toggle span {
+  display: flex;
+  flex-direction: column;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gr-share-toggle span em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
 }
 
 .gr-tag.overdue {
