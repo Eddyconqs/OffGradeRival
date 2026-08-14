@@ -1671,24 +1671,12 @@ a:focus-visible {
 
 .gr-landing {
   min-height: 100vh;
-  overflow-x: hidden;
+  /* overflow-x: hidden (not clip) would implicitly compute overflow-y to
+     auto per the CSS overflow spec, turning this into a scroll container
+     and breaking position: sticky for every descendant (the whole scroll
+     story depends on sticking to the real viewport, not this element). */
+  overflow-x: clip;
   position: relative;
-}
-
-.gr-landing::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle at 20% -10%, rgba(59, 231, 255, 0.09), transparent 45%),
-    radial-gradient(circle at 100% 10%, rgba(139, 92, 255, 0.08), transparent 45%),
-    radial-gradient(circle at 50% 100%, rgba(255, 200, 87, 0.05), transparent 50%);
-}
-
-.gr-landing > * {
-  position: relative;
-  z-index: 1;
 }
 
 .gr-landing-shell {
@@ -1703,13 +1691,35 @@ a:focus-visible {
   }
 }
 
-/* ---------- header ---------- */
+/* ---------- fixed header ---------- */
+
+.gr-landing-header-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(7, 11, 24, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+:root[data-theme="light"] .gr-landing-header-fixed {
+  background: rgba(247, 249, 252, 0.78);
+}
 
 .gr-landing-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-6) 0;
+  padding: 16px var(--space-8);
+}
+
+@media (max-width: 700px) {
+  .gr-landing-header {
+    padding: 14px var(--space-4);
+  }
 }
 
 .gr-landing-header-actions {
@@ -1736,7 +1746,7 @@ a:focus-visible {
 
 .gr-landing-hero {
   text-align: center;
-  padding: clamp(48px, 10vh, 96px) 0 clamp(32px, 6vh, 64px);
+  padding: clamp(120px, 22vh, 168px) 0 clamp(48px, 8vh, 80px);
 }
 
 .gr-landing-tagline {
@@ -1815,392 +1825,448 @@ a:focus-visible {
   color: var(--text-muted);
 }
 
-/* ---------- pillars ---------- */
-
-.gr-landing-pillars {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  padding: var(--space-8) 0;
+.gr-landing-scrollcue {
+  margin: 56px auto 0;
+  width: 22px;
+  height: 36px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  padding-top: 7px;
 }
 
-@media (max-width: 860px) {
-  .gr-landing-pillars {
-    grid-template-columns: 1fr;
+.gr-landing-scrollcue span {
+  width: 3px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--cyan);
+  animation: gr-scrollcue 1.8s ease-in-out infinite;
+}
+
+@keyframes gr-scrollcue {
+  0% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
   }
 }
 
-.gr-pillar-card-lg {
-  background: linear-gradient(180deg, var(--surface), var(--surface));
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 40px 30px;
-  text-align: center;
-  transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+/* ============================================================
+   Scroll story — Compete / Improve / Celebrate
+   ============================================================ */
+
+/* Desktop: pinned + scroll-scrubbed. The wrapper is tall (set
+   inline per-instance isn't needed — fixed 300vh gives ~1 screen
+   of scroll per phase) and the inner stage sticks for its whole
+   duration while Framer Motion drives phase opacity/scale/position
+   straight off scroll progress. */
+
+.gr-story-desktop-only {
+  display: none;
 }
 
-.gr-pillar-card-lg:hover {
-  transform: translateY(-3px);
+.gr-story-mobile-only {
+  display: block;
 }
 
-.gr-pillar-card-lg.compete {
-  border-color: rgba(139, 92, 255, 0.25);
-}
-.gr-pillar-card-lg.compete:hover {
-  border-color: rgba(139, 92, 255, 0.55);
-}
-.gr-pillar-card-lg.improve {
-  border-color: rgba(59, 231, 255, 0.25);
-}
-.gr-pillar-card-lg.improve:hover {
-  border-color: rgba(59, 231, 255, 0.55);
-}
-.gr-pillar-card-lg.celebrate {
-  border-color: rgba(255, 200, 87, 0.25);
-}
-.gr-pillar-card-lg.celebrate:hover {
-  border-color: rgba(255, 200, 87, 0.55);
-}
-
-.gr-pillar-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  margin: 0 auto 22px;
-}
-
-.gr-pillar-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.gr-pillar-card-lg.compete .gr-pillar-icon {
-  background: rgba(139, 92, 255, 0.12);
-  color: var(--violet-text);
-}
-.gr-pillar-card-lg.improve .gr-pillar-icon {
-  background: rgba(59, 231, 255, 0.12);
-  color: var(--cyan-text);
-}
-.gr-pillar-card-lg.celebrate .gr-pillar-icon {
-  background: rgba(255, 200, 87, 0.12);
-  color: var(--gold-text);
-}
-
-.gr-pillar-word {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(32px, 4.5vw, 52px);
-  letter-spacing: -0.01em;
-  margin: 0 0 14px;
-}
-
-.gr-pillar-card-lg.compete .gr-pillar-word {
-  color: var(--violet-text);
-}
-.gr-pillar-card-lg.improve .gr-pillar-word {
-  color: var(--cyan-text);
-}
-.gr-pillar-card-lg.celebrate .gr-pillar-word {
-  color: var(--gold-text);
-}
-
-.gr-pillar-sub {
-  font-size: 14px;
-  line-height: 1.65;
-  color: var(--text-muted);
-  max-width: 34ch;
-  margin: 0 auto;
-}
-
-/* ---------- app mockup ---------- */
-
-.gr-landing-mockup-section {
-  padding: var(--space-8) 0 clamp(48px, 8vh, 96px);
-  text-align: center;
-}
-
-.gr-landing-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--cyan-text);
-  margin: 0 0 12px;
-}
-
-.gr-landing-mockup-section h2 {
-  font-family: var(--display);
-  font-size: clamp(26px, 4vw, 38px);
-  font-weight: 600;
-  margin: 0 0 40px;
-  letter-spacing: -0.01em;
-}
-
-.gr-mockup-frame {
-  max-width: 980px;
-  margin: 0 auto;
-  border-radius: 20px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  box-shadow: 0 60px 120px -40px rgba(0, 0, 0, 0.6), var(--glow-cyan);
-  overflow: hidden;
-  text-align: left;
-}
-
-.gr-mockup-topbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-elevated);
-}
-
-.gr-mockup-dots {
-  display: flex;
-  gap: 6px;
-  flex: none;
-}
-
-.gr-mockup-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--border-strong);
-}
-
-.gr-mockup-url {
-  flex: 1;
-  text-align: center;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  background: var(--bg);
-  border-radius: 999px;
-  padding: 5px 14px;
-  margin: 0 60px;
-}
-
-@media (max-width: 640px) {
-  .gr-mockup-url {
-    margin: 0 20px;
+@media (min-width: 861px) {
+  .gr-story-desktop-only {
+    display: block;
   }
-}
-
-.gr-mockup-body {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-}
-
-@media (max-width: 640px) {
-  .gr-mockup-body {
-    grid-template-columns: 1fr;
-  }
-}
-
-.gr-mockup-sidebar {
-  border-right: 1px solid var(--border);
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-@media (max-width: 640px) {
-  .gr-mockup-sidebar {
+  .gr-story-mobile-only {
     display: none;
   }
 }
 
-.gr-mockup-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  padding: 8px 10px;
-  border-radius: 8px;
-}
-
-.gr-mockup-nav-item svg {
-  width: 14px;
-  height: 14px;
-  flex: none;
-}
-
-.gr-mockup-nav-item.active {
-  color: var(--text);
-  background: var(--surface-elevated);
+.gr-story-pin-wrap {
+  height: 300vh;
   position: relative;
 }
 
-.gr-mockup-nav-item.active::before {
-  content: "";
+.gr-story-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gr-story-glow {
   position: absolute;
-  left: -14px;
+  inset: -20%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.gr-story-progress-rail {
+  position: absolute;
+  right: clamp(20px, 4vw, 56px);
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 14px;
-  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 2;
+}
+
+.gr-story-dot {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.gr-story-dot.violet {
+  background: var(--violet);
+}
+.gr-story-dot.cyan {
   background: var(--cyan);
 }
-
-.gr-mockup-content {
-  padding: 22px;
+.gr-story-dot.gold {
+  background: var(--gold);
 }
 
-.gr-mockup-greeting {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0 0 4px;
-}
-
-.gr-mockup-hero {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  background: linear-gradient(165deg, var(--surface-elevated), var(--surface) 70%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px;
-  margin-bottom: 16px;
-}
-
-.gr-mockup-orb {
-  flex: none;
-  width: 78px;
-  height: 78px;
-  position: relative;
-}
-
-.gr-mockup-orb svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.gr-mockup-orb .track {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 7;
-}
-
-.gr-mockup-orb .fill {
-  fill: none;
-  stroke: url(#gr-mockup-orb-gradient);
-  stroke-width: 7;
-  stroke-linecap: round;
-}
-
-.gr-mockup-orb-center {
+.gr-story-phase {
   position: absolute;
   inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+  z-index: 1;
+}
+
+.gr-story-word {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(48px, 9vw, 104px);
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+
+.gr-story-phase.violet .gr-story-word {
+  color: var(--violet-text);
+  text-shadow: 0 0 70px rgba(139, 92, 255, 0.4);
+}
+.gr-story-phase.cyan .gr-story-word {
+  color: var(--cyan-text);
+  text-shadow: 0 0 70px rgba(59, 231, 255, 0.4);
+}
+.gr-story-phase.gold .gr-story-word {
+  color: var(--gold-text);
+  text-shadow: 0 0 70px rgba(255, 200, 87, 0.4);
+}
+
+.gr-story-phase-copy {
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--text-muted);
+  max-width: 46ch;
+  margin: 0 0 32px;
+}
+
+.gr-story-mock {
+  width: min(420px, 90vw);
+}
+
+.gr-story-mock-caption {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.gr-story-mock-caption b {
+  color: var(--text);
+}
+
+/* ---------- mobile / reduced-motion fallback ---------- */
+
+.gr-sequential-story {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gr-story-phase-static {
+  padding: clamp(48px, 10vh, 88px) 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.gr-story-phase-static .gr-story-word {
+  font-size: clamp(40px, 13vw, 64px);
+}
+
+.gr-story-phase-static.violet .gr-story-word {
+  color: var(--violet-text);
+}
+.gr-story-phase-static.cyan .gr-story-word {
+  color: var(--cyan-text);
+}
+.gr-story-phase-static.gold .gr-story-word {
+  color: var(--gold-text);
+}
+
+.gr-story-phase-static .gr-story-mock {
+  margin: 0 auto;
+}
+
+/* ---------- rivalry mock (Compete) ---------- */
+
+.gr-rivalry-mock {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.55);
+}
+
+.gr-rivalry-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.gr-rivalry-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.gr-rivalry-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
   font-family: var(--display);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 14px;
 }
 
-.gr-mockup-hero-copy .name {
-  font-family: var(--display);
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 4px;
+.gr-rivalry-avatar.you {
+  background: linear-gradient(155deg, var(--cyan), var(--violet));
+  color: #041014;
 }
 
-.gr-mockup-hero-copy .line {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.gr-mockup-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-@media (max-width: 640px) {
-  .gr-mockup-cards {
-    grid-template-columns: 1fr;
-  }
-}
-
-.gr-mockup-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.gr-mockup-card-head {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.gr-mockup-card-head svg {
-  width: 13px;
-  height: 13px;
-}
-
-.gr-mockup-card p {
-  font-size: 11px;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin: 0;
-}
-
-.gr-mockup-card b {
+.gr-rivalry-avatar.rival {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
   color: var(--text);
 }
 
-.gr-mockup-fake-bar {
-  height: 5px;
+.gr-rivalry-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gr-rivalry-vs {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.gr-rivalry-track {
+  height: 8px;
   border-radius: 999px;
-  background: var(--border);
+  background: var(--bg);
+  border: 1px solid var(--border);
   overflow: hidden;
-  margin-top: 8px;
+  margin-top: 22px;
 }
 
-.gr-mockup-fake-bar span {
-  display: block;
+.gr-rivalry-fill {
   height: 100%;
+  width: 62%;
   border-radius: 999px;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
 }
 
-/* ---------- closing CTA + footer ---------- */
+/* ---------- graph mock (Improve) ---------- */
 
-.gr-landing-closing {
+.gr-graph-mock {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 22px 26px 26px;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.55);
+}
+
+.gr-graph-svg {
+  width: 100%;
+  height: 130px;
+  display: block;
+}
+
+.gr-graph-target {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.gr-graph-you {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gr-graph-rival {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.5;
+}
+
+.gr-graph-legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.gr-graph-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.gr-graph-legend i {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.gr-graph-legend i.you {
+  background: var(--cyan);
+}
+.gr-graph-legend i.rival {
+  background: var(--text-muted);
+  opacity: 0.6;
+}
+.gr-graph-legend i.target {
+  background: var(--border-strong);
+}
+
+/* ---------- celebrate mock ---------- */
+
+.gr-celebrate-mock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gr-celebrate-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.5);
+  text-align: left;
+}
+
+.gr-celebrate-icon {
+  font-size: 24px;
+  flex: none;
+}
+
+.gr-celebrate-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gr-celebrate-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gr-celebrate-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gold-text);
+  margin-top: 2px;
+}
+
+.gr-celebrate-reactions {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: none;
+}
+
+/* ---------- unify / closing ---------- */
+
+.gr-landing-unify {
   text-align: center;
-  padding: clamp(48px, 8vh, 88px) 0;
-  border-top: 1px solid var(--border);
+  padding: clamp(56px, 10vh, 100px) 0;
 }
 
-.gr-landing-closing h2 {
+.gr-landing-unify-words {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2vw, 20px);
+  flex-wrap: wrap;
   font-family: var(--display);
-  font-size: clamp(24px, 3.5vw, 34px);
+  font-weight: 700;
+  font-size: clamp(22px, 4vw, 40px);
+  margin-bottom: 22px;
+}
+
+.gr-landing-unify-words span {
+  padding-bottom: 4px;
+  border-bottom: 3px solid transparent;
+}
+
+.gr-landing-unify-words .compete {
+  color: var(--violet-text);
+  border-color: rgba(139, 92, 255, 0.45);
+}
+.gr-landing-unify-words .improve {
+  color: var(--cyan-text);
+  border-color: rgba(59, 231, 255, 0.45);
+}
+.gr-landing-unify-words .celebrate {
+  color: var(--gold-text);
+  border-color: rgba(255, 200, 87, 0.45);
+}
+
+.gr-landing-unify h2 {
+  font-family: var(--display);
+  font-size: clamp(26px, 4vw, 38px);
   font-weight: 600;
   margin: 0 0 12px;
 }
 
-.gr-landing-closing p {
+.gr-landing-unify p {
   color: var(--text-muted);
   font-size: 14px;
-  margin: 0 0 26px;
+  margin: 0 0 28px;
 }
 
 .gr-landing-footer {
