@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { UploadCloud } from "lucide-react";
 import { useStore } from "../lib/store";
 import { formatBytes, fileExt, ingestFiles } from "../lib/files";
 
@@ -19,8 +20,10 @@ function FileUpload({ destination, classId, onDestinationChange, onClassChange, 
   };
 
   return (
-    <div className="gr-card">
-      <div className="gr-card-title">Upload a file</div>
+    <div className="gr-card panel">
+      <div className="gr-panel-head tone-mint">
+        <UploadCloud /> Upload a File
+      </div>
       <p className="gr-card-sub">Keep it to yourself, or share it straight to a study group — pick a destination below.</p>
       <div className="gr-row" style={{ marginBottom: 10 }}>
         <div className="gr-field" style={{ flex: 1 }}>
@@ -73,6 +76,8 @@ function FileUpload({ destination, classId, onDestinationChange, onClassChange, 
           : "Drop a file here to share it with the group, or click to browse"}
         {" · +15 XP per upload"}
       </div>
+      <span className="gr-panel-bolt bl" />
+      <span className="gr-panel-bolt br" />
     </div>
   );
 }
@@ -178,6 +183,7 @@ export default function Files({ initialGroupId }) {
     <div>
       <div className="gr-section-head">
         <div>
+          <span className="gr-eyebrow tone-mint">The Equipment Room</span>
           <h2>Files</h2>
           <p>Upload once — keep it personal or share it straight to a study group. Everything lives here.</p>
         </div>
@@ -199,7 +205,7 @@ export default function Files({ initialGroupId }) {
           {tabs.map((t) => (
             <button
               key={t.id}
-              className={`gr-btn small ${tab === t.id ? "primary" : "ghost"}`}
+              className={`gr-btn small ${tab === t.id ? "primary tone-mint" : "ghost"}`}
               onClick={() => setTab(t.id)}
             >
               {t.label} ({t.count})

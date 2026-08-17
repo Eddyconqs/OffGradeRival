@@ -18,7 +18,8 @@ import Files from "./Files";
 function Toast() {
   const { toast } = useStore();
   if (!toast) return null;
-  return <div className="gr-toast">{toast.msg}</div>;
+  const isXp = /^\+\d+\s*XP/i.test(toast.msg);
+  return <div className={`gr-toast${isXp ? " gold" : ""}`}>{toast.msg}</div>;
 }
 
 function initials(name) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { BookOpen } from "lucide-react";
 import { useStore, computeClassPct, pctToLetterPoints, uid } from "../lib/store";
 
 const PALETTE = ["#e8b93f", "#9d8cff", "#4fd1a5", "#e15a45", "#6fb7e8", "#f0a8c9"];
@@ -12,14 +13,17 @@ function NewClassForm({ onAdd }) {
 
   if (!open) {
     return (
-      <button className="gr-btn primary" onClick={() => setOpen(true)}>
+      <button className="gr-btn primary tone-violet" onClick={() => setOpen(true)}>
         + Add a class
       </button>
     );
   }
 
   return (
-    <div className="gr-card" style={{ marginBottom: 16 }}>
+    <div className="gr-card panel" style={{ marginBottom: 16 }}>
+      <div className="gr-panel-head tone-violet">
+        <BookOpen /> New Class
+      </div>
       <div className="gr-row">
         <div className="gr-field" style={{ flex: 2 }}>
           <label>Class name</label>
@@ -30,7 +34,7 @@ function NewClassForm({ onAdd }) {
           <input type="number" min="1" max="6" value={credits} onChange={(e) => setCredits(e.target.value)} />
         </div>
         <button
-          className="gr-btn primary"
+          className="gr-btn primary tone-violet"
           disabled={!name.trim()}
           onClick={() => {
             onAdd(name.trim(), PALETTE[Math.floor(Math.random() * PALETTE.length)], credits);
@@ -44,6 +48,8 @@ function NewClassForm({ onAdd }) {
           Cancel
         </button>
       </div>
+      <span className="gr-panel-bolt bl" />
+      <span className="gr-panel-bolt br" />
     </div>
   );
 }
@@ -81,7 +87,7 @@ function AddAssignmentRow({ classId, categories, onAdd }) {
           <input type="number" value={max} onChange={(e) => setMax(e.target.value)} />
         </div>
         <button
-          className="gr-btn small primary"
+          className="gr-btn small primary tone-violet"
           disabled={!name.trim() || score === "" || !max || !categoryId}
           onClick={() => {
             onAdd(classId, categoryId, name.trim(), score, max, shareToFeed);
@@ -264,7 +270,7 @@ function ClassCard({ klass }) {
               <input type="number" value={catWeight} onChange={(e) => setCatWeight(e.target.value)} />
             </div>
             <button
-              className="gr-btn small primary"
+              className="gr-btn small primary tone-violet"
               disabled={!catName.trim()}
               onClick={() => {
                 addCategory(klass.id, catName.trim(), catWeight);
@@ -303,6 +309,7 @@ export default function Classes() {
     <div>
       <div className="gr-section-head">
         <div>
+          <span className="gr-eyebrow tone-violet">The Compete Zone</span>
           <h2>Classes & Grades</h2>
           <p>Weight your categories, log real scores, and project what comes next.</p>
         </div>

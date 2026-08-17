@@ -267,8 +267,11 @@ button {
   align-items: center;
   gap: var(--space-3);
   color: var(--text-muted);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-family: var(--stat);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   padding: 10px var(--space-3);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -302,9 +305,21 @@ button {
   width: 3px;
   height: 18px;
   border-radius: 3px;
-  background: var(--cyan);
-  box-shadow: 0 0 10px 1px rgba(59, 231, 255, 0.6);
 }
+
+/* Each section carries its own tone instead of one global cyan — the icon
+   is always tinted; the active-tab rail picks up the same color. */
+.gr-sidebar-link.tone-cyan svg { color: var(--cyan-text); }
+.gr-sidebar-link.tone-violet svg { color: var(--violet-text); }
+.gr-sidebar-link.tone-gold svg { color: var(--gold-text); }
+.gr-sidebar-link.tone-mint svg { color: var(--mint-text); }
+.gr-sidebar-link.tone-coral svg { color: var(--coral-text); }
+
+.gr-sidebar-link.tone-cyan.active::before { background: var(--cyan); box-shadow: 0 0 10px 1px rgba(59, 231, 255, 0.6); }
+.gr-sidebar-link.tone-violet.active::before { background: var(--violet); box-shadow: 0 0 10px 1px rgba(139, 92, 255, 0.6); }
+.gr-sidebar-link.tone-gold.active::before { background: var(--gold); box-shadow: 0 0 10px 1px rgba(255, 200, 87, 0.6); }
+.gr-sidebar-link.tone-mint.active::before { background: var(--mint); box-shadow: 0 0 10px 1px rgba(77, 255, 181, 0.6); }
+.gr-sidebar-link.tone-coral.active::before { background: var(--coral); box-shadow: 0 0 10px 1px rgba(255, 95, 109, 0.6); }
 
 .gr-sidebar-foot {
   border-top: 1px solid var(--border);
@@ -480,6 +495,100 @@ button {
   color: var(--text-muted);
   font-size: 12.5px;
   margin: 0 0 16px;
+}
+
+/* ---------- Panel treatment ----------
+   Extends the Dashboard's "hardware" language (.gr-arena/.gr-board — corner
+   bolts, a nameplate header) to the primary card on other pages, instead of
+   confining that look to the Dashboard alone. Applied selectively (the lead
+   card per page), not to every .gr-card, so it reads as a deliberate accent
+   rather than replacing the whole card system. */
+
+.gr-card.panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.gr-panel-bolt {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.3;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+.gr-panel-bolt.bl { bottom: 9px; left: 9px; }
+.gr-panel-bolt.br { bottom: 9px; right: 9px; }
+
+.gr-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: -22px -22px 16px;
+  padding: 12px 22px;
+  background: rgba(148, 163, 184, 0.05);
+  border-bottom: 1px solid var(--border);
+  /* Notched top-right corner — a scoreboard-panel/jersey-plate cut, the one
+     place in the app that breaks from border-radius. The parent's
+     overflow:hidden + border-radius clip this to match on the left. */
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+}
+
+.gr-panel-head svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+.gr-panel-head.tone-cyan svg { color: var(--cyan-text); }
+.gr-panel-head.tone-violet svg { color: var(--violet-text); }
+.gr-panel-head.tone-gold svg { color: var(--gold-text); }
+.gr-panel-head.tone-mint svg { color: var(--mint-text); }
+.gr-panel-head.tone-coral svg { color: var(--coral-text); }
+
+/* Bracket-corner tick — a small decorative accent framing a panel head,
+   evoking a scoreboard bracket rather than a plain divider. */
+.gr-bracket-tick {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.5;
+  margin-right: 2px;
+}
+
+/* Scoreboard center-line divider — replaces a plain border-bottom between
+   major sections with a short, centered tick instead of a full-width rule. */
+.gr-center-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 28px 0;
+}
+.gr-center-divider::before,
+.gr-center-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.gr-center-divider span {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin: 0 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
 }
 
 .gr-grid {
@@ -1340,10 +1449,46 @@ button.gr-led-stat:hover {
   background: linear-gradient(160deg, var(--cyan), #1fb8d6);
   border-color: transparent;
   color: #041014;
+  /* Same notch language as .gr-panel-head, scaled down to button size. */
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
 }
 
 .gr-btn.primary:hover {
   box-shadow: var(--glow-cyan);
+}
+
+/* Tone modifiers — a section's primary actions pick up its own color
+   instead of every "Save"/"Post"/"Create" button defaulting to cyan. */
+.gr-btn.primary.tone-violet {
+  background: linear-gradient(160deg, var(--violet), #6a3ce0);
+  color: #fff;
+}
+.gr-btn.primary.tone-violet:hover {
+  box-shadow: 0 0 0 1px rgba(139, 92, 255, 0.35), 0 0 24px -4px rgba(139, 92, 255, 0.5);
+}
+
+.gr-btn.primary.tone-gold {
+  background: linear-gradient(160deg, var(--gold), #e8a934);
+  color: #041014;
+}
+.gr-btn.primary.tone-gold:hover {
+  box-shadow: 0 0 0 1px rgba(255, 200, 87, 0.35), 0 0 24px -4px rgba(255, 200, 87, 0.5);
+}
+
+.gr-btn.primary.tone-mint {
+  background: linear-gradient(160deg, var(--mint), #22d696);
+  color: #041014;
+}
+.gr-btn.primary.tone-mint:hover {
+  box-shadow: 0 0 0 1px rgba(77, 255, 181, 0.35), 0 0 24px -4px rgba(77, 255, 181, 0.5);
+}
+
+.gr-btn.primary.tone-coral {
+  background: linear-gradient(160deg, var(--coral), #e8394a);
+  color: #fff;
+}
+.gr-btn.primary.tone-coral:hover {
+  box-shadow: 0 0 0 1px rgba(255, 95, 109, 0.35), 0 0 24px -4px rgba(255, 95, 109, 0.5);
 }
 
 .gr-btn.ghost {
@@ -1362,6 +1507,10 @@ button.gr-led-stat:hover {
   padding: 6px 11px;
   font-size: 11.5px;
   border-radius: 8px;
+}
+
+.gr-btn.small.primary {
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
 }
 
 .gr-btn:disabled {
@@ -1884,6 +2033,13 @@ a:focus-visible {
   animation: gr-toast-in 0.25s var(--ease-out);
 }
 
+/* XP/streak grants get the achievement color instead of the default cyan —
+   leans into gold as the app's "you earned something" signal. */
+.gr-toast.gold {
+  border-color: var(--gold);
+  color: var(--gold-text);
+}
+
 @keyframes gr-toast-in {
   from {
     opacity: 0;
@@ -1904,6 +2060,22 @@ a:focus-visible {
   margin-bottom: 16px;
   gap: 12px;
 }
+
+.gr-eyebrow {
+  display: block;
+  font-family: var(--stat);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.gr-eyebrow.tone-cyan { color: var(--cyan-text); }
+.gr-eyebrow.tone-violet { color: var(--violet-text); }
+.gr-eyebrow.tone-gold { color: var(--gold-text); }
+.gr-eyebrow.tone-mint { color: var(--mint-text); }
+.gr-eyebrow.tone-coral { color: var(--coral-text); }
 
 .gr-section-head h2 {
   font-family: var(--display);
@@ -2051,9 +2223,11 @@ a:focus-visible {
     height: 20px;
   }
 
-  .gr-bottom-nav-item.active {
-    color: var(--cyan-text);
-  }
+  .gr-bottom-nav-item.tone-cyan.active { color: var(--cyan-text); }
+  .gr-bottom-nav-item.tone-violet.active { color: var(--violet-text); }
+  .gr-bottom-nav-item.tone-gold.active { color: var(--gold-text); }
+  .gr-bottom-nav-item.tone-mint.active { color: var(--mint-text); }
+  .gr-bottom-nav-item.tone-coral.active { color: var(--coral-text); }
 
   .gr-fab {
     display: flex;
@@ -2939,7 +3113,7 @@ a:focus-visible {
 
 .gr-reaction-btn.active {
   background: var(--surface-elevated);
-  border-color: var(--cyan);
+  border-color: var(--coral);
 }
 
 .gr-reaction-btn span {

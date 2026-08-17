@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Image as ImageIcon, X } from "lucide-react";
+import { Image as ImageIcon, X, Megaphone } from "lucide-react";
 import { useStore, REACTIONS } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import { searchGifs, trendingGifs, giphyConfigured } from "../lib/giphy";
@@ -119,8 +119,10 @@ function Composer({ onPost }) {
   };
 
   return (
-    <div className="gr-card" style={{ marginBottom: 18 }}>
-      <div className="gr-card-title">Share something</div>
+    <div className="gr-card panel" style={{ marginBottom: 18 }}>
+      <div className="gr-panel-head tone-coral">
+        <Megaphone /> Share Something
+      </div>
       <p className="gr-card-sub">Only your accepted friends will see this in their feed.</p>
       <textarea
         value={text}
@@ -150,10 +152,12 @@ function Composer({ onPost }) {
         <button className="gr-btn small ghost" onClick={() => setPickerOpen((v) => !v)}>
           <ImageIcon size={14} /> {gif ? "Change GIF" : "Add GIF"}
         </button>
-        <button className="gr-btn primary" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
+        <button className="gr-btn primary tone-coral" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
           Post
         </button>
       </div>
+      <span className="gr-panel-bolt bl" />
+      <span className="gr-panel-bolt br" />
     </div>
   );
 }
@@ -207,7 +211,7 @@ function CommentComposer({ onSubmit }) {
         <button className="gr-btn small ghost" onClick={() => setPickerOpen((v) => !v)} aria-label="Add GIF">
           <ImageIcon size={14} />
         </button>
-        <button className="gr-btn small primary" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
+        <button className="gr-btn small primary tone-coral" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
           Reply
         </button>
       </div>
@@ -321,6 +325,7 @@ export default function Feed() {
     <div>
       <div className="gr-section-head">
         <div>
+          <span className="gr-eyebrow tone-coral">The Locker Room</span>
           <h2>Feed</h2>
           <p>Updates from your circle — text, GIFs, and whatever's worth sharing.</p>
         </div>

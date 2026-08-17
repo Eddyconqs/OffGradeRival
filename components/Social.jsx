@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Swords, Users, Trophy } from "lucide-react";
 import { useStore } from "../lib/store";
 import { useAuth } from "../lib/auth";
 
@@ -65,7 +66,7 @@ function FriendSearch({ friends, incomingRequests, outgoingRequests, onSend }) {
                 {c.name}
               </span>
               <button
-                className="gr-btn small primary"
+                className="gr-btn small primary tone-violet"
                 onClick={() => {
                   onSend(c.id, c.name);
                   setQuery("");
@@ -99,8 +100,10 @@ function Leaderboard({ friends, profile, gpa, levelInfo }) {
   let rankCounter = 0;
 
   return (
-    <div className="gr-card">
-      <div className="gr-card-title">Leaderboard</div>
+    <div className="gr-card panel">
+      <div className="gr-panel-head tone-violet">
+        <Trophy /> Leaderboard
+      </div>
       <p className="gr-card-sub">Ranked by GPA across your circle — friends keeping theirs private show up unranked.</p>
       {rows.map((r) => {
         const isRanked = r.gpa != null;
@@ -138,6 +141,8 @@ function Leaderboard({ friends, profile, gpa, levelInfo }) {
           Add a rival to start a leaderboard.
         </div>
       )}
+      <span className="gr-panel-bolt bl" />
+      <span className="gr-panel-bolt br" />
     </div>
   );
 }
@@ -156,7 +161,7 @@ function GroupFilesLink({ group, files, onOpenFiles }) {
       <p className="gr-card-sub" style={{ margin: "0 0 10px" }}>
         Uploading and sharing files now happens on the Files page — pick this group as the destination.
       </p>
-      <button className="gr-btn small primary" onClick={() => onOpenFiles(group.id)}>
+      <button className="gr-btn small primary tone-violet" onClick={() => onOpenFiles(group.id)}>
         Open {group.name}'s files
       </button>
     </div>
@@ -188,7 +193,7 @@ function GroupNotes({ group, onAddNote, onRemoveNote }) {
             onKeyDown={(e) => e.key === "Enter" && submit()}
           />
         </div>
-        <button className="gr-btn small primary" disabled={!draft.trim()} onClick={submit}>
+        <button className="gr-btn small primary tone-violet" disabled={!draft.trim()} onClick={submit}>
           Post
         </button>
       </div>
@@ -254,7 +259,7 @@ function GroupReminders({ group, onAddReminder, onToggleReminder, onRemoveRemind
           <label>Due (optional)</label>
           <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
         </div>
-        <button className="gr-btn small primary" disabled={!text.trim()} onClick={submit}>
+        <button className="gr-btn small primary tone-violet" disabled={!text.trim()} onClick={submit}>
           Add
         </button>
       </div>
@@ -339,7 +344,7 @@ function GroupCard({
                 }}
                 style={{ flex: 1, minWidth: 120 }}
               />
-              <button className="gr-btn small primary" disabled={!nameDraft.trim()} onClick={saveRename}>
+              <button className="gr-btn small primary tone-violet" disabled={!nameDraft.trim()} onClick={saveRename}>
                 Save
               </button>
               <button className="gr-btn small ghost" onClick={() => setEditingName(false)}>
@@ -483,7 +488,7 @@ function NewGroupForm({ friends, onAdd }) {
 
   if (!open) {
     return (
-      <button className="gr-btn primary" onClick={() => setOpen(true)}>
+      <button className="gr-btn primary tone-violet" onClick={() => setOpen(true)}>
         + Create a study group
       </button>
     );
@@ -515,7 +520,7 @@ function NewGroupForm({ friends, onAdd }) {
       </div>
       <div className="gr-row">
         <button
-          className="gr-btn primary"
+          className="gr-btn primary tone-violet"
           disabled={!name.trim()}
           onClick={() => {
             onAdd(name.trim(), selected);
@@ -577,6 +582,7 @@ export default function Social({ onNavigate }) {
     <div>
       <div className="gr-section-head">
         <div>
+          <span className="gr-eyebrow tone-violet">The Rivalry Wing</span>
           <h2>Friends & Groups</h2>
           <p>Real connections — find someone by their full name and send a request to start racing GPAs.</p>
         </div>
@@ -584,8 +590,10 @@ export default function Social({ onNavigate }) {
 
       <div className="gr-grid cols-2">
         <div>
-          <div className="gr-card" style={{ marginBottom: 18 }}>
-            <div className="gr-card-title">Your rivals</div>
+          <div className="gr-card panel" style={{ marginBottom: 18 }}>
+            <div className="gr-panel-head tone-violet">
+              <Swords /> Your Rivals
+            </div>
             <p className="gr-card-sub">Compete for the highest GPA — on your terms.</p>
             <label className="gr-share-toggle">
               <input type="checkbox" checked={profile.shareGpa} onChange={toggleShareGpa} />
@@ -611,7 +619,7 @@ export default function Social({ onNavigate }) {
                     <span>{r.name}</span>
                     <span style={{ display: "flex", gap: 6 }}>
                       <button
-                        className="gr-btn small primary"
+                        className="gr-btn small primary tone-violet"
                         onClick={() => acceptFriendRequest(r.friendshipId, r.name)}
                       >
                         Accept
@@ -660,10 +668,14 @@ export default function Social({ onNavigate }) {
               ))}
               {!friends.length && <div className="gr-empty">No rivals yet — search for one above.</div>}
             </div>
+            <span className="gr-panel-bolt bl" />
+            <span className="gr-panel-bolt br" />
           </div>
 
-          <div className="gr-card">
-            <div className="gr-card-title">Study groups</div>
+          <div className="gr-card panel">
+            <div className="gr-panel-head tone-violet">
+              <Users /> Study Groups
+            </div>
             <p className="gr-card-sub">Shared spaces for files, notes, and reminders.</p>
             <NewGroupForm friends={friends} onAdd={addGroup} />
             <div style={{ marginTop: 14 }}>
@@ -689,6 +701,8 @@ export default function Social({ onNavigate }) {
               ))}
               {!groups.length && <div className="gr-empty">No groups yet — create one above.</div>}
             </div>
+            <span className="gr-panel-bolt bl" />
+            <span className="gr-panel-bolt br" />
           </div>
         </div>
 
