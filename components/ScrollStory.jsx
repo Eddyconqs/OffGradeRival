@@ -114,11 +114,11 @@ function CompeteScene({ progress, cinematic = true }) {
               <div className="gr-rivalry-pair" style={{ margin: "4px 0 18px" }}>
                 <div className="gr-rivalry-side">
                   <div className="who">You</div>
-                  <div className="gpa" style={{ color: "var(--cyan-text)" }}>
+                  <div className="gpa" style={{ color: "var(--accent-text)" }}>
                     3.78
                   </div>
                 </div>
-                <ArrowUpRight style={{ color: "var(--mint-text)", flex: "none" }} />
+                <ArrowUpRight style={{ color: "var(--success-text)", flex: "none" }} />
                 <div className="gr-rivalry-side">
                   <div className="who">Alex M.</div>
                   <div className="gpa">3.66</div>
@@ -224,7 +224,7 @@ function ImproveScene({ progress, cinematic = true }) {
               <div className="gr-cine-pct">{pctDisplay}%</div>
             </div>
             <div className="gr-pct-track" style={{ marginBottom: 16 }}>
-              <motion.div className="gr-pct-fill" style={{ width: pctWidth, background: "var(--cyan)" }} />
+              <motion.div className="gr-pct-fill" style={{ width: pctWidth, background: "var(--accent)" }} />
             </div>
             <div className="gr-cine-row">
               <span>Midterm 1</span>
@@ -246,7 +246,7 @@ function ImproveScene({ progress, cinematic = true }) {
                 cy="50"
                 r="40"
                 fill="none"
-                stroke="var(--cyan)"
+                stroke="var(--accent)"
                 strokeWidth="8"
                 strokeDasharray="251.2"
                 strokeLinecap="round"
@@ -303,7 +303,7 @@ function CelebrateScene({ progress, cinematic = true }) {
 
           <div className="gr-cine-card gr-cine-share-row">
             <span className="gr-cine-share-label">
-              <Star size={20} style={{ color: "var(--gold-text)", flex: "none" }} />
+              <Star size={20} style={{ color: "var(--accent-text)", flex: "none" }} />
               Reached Honor Roll — 3.90 GPA
             </span>
             <motion.button className="gr-btn primary" style={{ scale: shareScale }}>
@@ -439,11 +439,14 @@ function PinnedStory() {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
 
   // [R,G,B] per phase for a manual lerp — see lerpKeyframes' comment for
-  // why this avoids useTransform's array-keyframes overload.
+  // why this avoids useTransform's array-keyframes overload. All three
+  // stay in the brand's orange family (single accent, no per-section
+  // hues) — differentiated by luminance so the three acts still read as
+  // distinct beats.
   const GLOW_STOPS = [
-    [139, 92, 255],
-    [59, 231, 255],
-    [255, 200, 87],
+    [199, 90, 28],
+    [242, 106, 33],
+    [255, 179, 71],
   ];
   const glowBg = useTransform(scrollYProgress, (v) => {
     const t = Math.max(0, Math.min(1, v));

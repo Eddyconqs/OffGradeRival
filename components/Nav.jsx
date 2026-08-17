@@ -16,19 +16,14 @@ import {
 import { useStore } from "../lib/store";
 import { signOut } from "../lib/auth";
 
-// Each section gets its own tone instead of defaulting everything to cyan —
-// reused for the sidebar's active indicator, that section's primary buttons,
-// and card/panel headers on that page. See TAB_TONE_LABEL for the map by id.
 export const TABS = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, tone: "cyan" },
-  { id: "classes", label: "My Courses", icon: BookOpen, tone: "violet" },
-  { id: "study", label: "Study Space", icon: Brain, tone: "gold" },
-  { id: "files", label: "Files", icon: FolderOpen, tone: "mint" },
-  { id: "feed", label: "Feed", icon: Rss, tone: "coral" },
-  { id: "social", label: "Groups", icon: Users, tone: "violet" },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "classes", label: "My Courses", icon: BookOpen },
+  { id: "study", label: "Study Space", icon: Brain },
+  { id: "files", label: "Files", icon: FolderOpen },
+  { id: "feed", label: "Feed", icon: Rss },
+  { id: "social", label: "Groups", icon: Users },
 ];
-
-export const TAB_TONE = Object.fromEntries(TABS.map((t) => [t.id, t.tone]));
 
 export function Sidebar({ active, onChange }) {
   const { theme, toggleTheme, profile, levelInfo } = useStore();
@@ -49,7 +44,7 @@ export function Sidebar({ active, onChange }) {
           return (
             <button
               key={t.id}
-              className={`gr-sidebar-link tone-${t.tone} ${active === t.id ? "active" : ""}`}
+              className={`gr-sidebar-link ${active === t.id ? "active" : ""}`}
               onClick={() => onChange(t.id)}
               aria-current={active === t.id ? "page" : undefined}
             >
@@ -96,7 +91,7 @@ export function BottomNav({ active, onChange }) {
         return (
           <button
             key={t.id}
-            className={`gr-bottom-nav-item tone-${t.tone} ${active === t.id ? "active" : ""}`}
+            className={`gr-bottom-nav-item ${active === t.id ? "active" : ""}`}
             onClick={() => onChange(t.id)}
             aria-current={active === t.id ? "page" : undefined}
           >

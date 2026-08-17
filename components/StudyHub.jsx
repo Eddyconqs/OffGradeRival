@@ -26,7 +26,7 @@ function StudyScoreboard() {
       <span className="gr-arena-bolt bl" />
       <span className="gr-arena-bolt br" />
       <div className="gr-board">
-        <div className="gr-board-head tone-mint">Study Scoreboard</div>
+        <div className="gr-board-head">Study Scoreboard</div>
         <div className="gr-board-grid">
           <div className="gr-led-stat">
             <div className="n">
@@ -48,7 +48,7 @@ function StudyScoreboard() {
           </div>
         </div>
         <div style={{ marginTop: 16, textAlign: "center" }}>
-          <button className="gr-btn primary tone-gold" disabled={claimedToday} onClick={claimStreakBonus}>
+          <button className="gr-btn primary" disabled={claimedToday} onClick={claimStreakBonus}>
             {claimedToday ? "Streak claimed today ✓" : "Claim today's streak bonus"}
           </button>
         </div>
@@ -108,7 +108,7 @@ function FocusTimer() {
         {PRESETS.map((m) => (
           <button
             key={m}
-            className={`gr-btn small ${m === minutes ? "primary tone-gold" : "ghost"}`}
+            className={`gr-btn small ${m === minutes ? "primary" : "ghost"}`}
             disabled={running}
             onClick={() => pick(m)}
           >
@@ -117,7 +117,7 @@ function FocusTimer() {
         ))}
       </div>
       <div className="gr-row" style={{ justifyContent: "center" }}>
-        <button className="gr-btn primary tone-gold" disabled={finished} onClick={() => setRunning((r) => !r)}>
+        <button className="gr-btn primary" disabled={finished} onClick={() => setRunning((r) => !r)}>
           {running ? "Pause" : "Start"}
         </button>
         <button className="gr-btn ghost" onClick={reset}>
@@ -170,7 +170,7 @@ function Quiz() {
         <p className="gr-card-sub">
           {correct} / {questions.length} correct — XP has been added to your level bar.
         </p>
-        <button className="gr-btn primary tone-gold" onClick={restart}>
+        <button className="gr-btn primary" onClick={restart}>
           Take another quiz
         </button>
       </div>
@@ -196,7 +196,7 @@ function Quiz() {
           </button>
         );
       })}
-      <button className="gr-btn primary tone-gold" style={{ marginTop: 8 }} disabled={picked === null} onClick={next}>
+      <button className="gr-btn primary" style={{ marginTop: 8 }} disabled={picked === null} onClick={next}>
         {i + 1 >= questions.length ? "Finish quiz" : "Next question"}
       </button>
     </div>
@@ -210,7 +210,7 @@ function DeckForm({ classes, onAdd }) {
 
   if (!open) {
     return (
-      <button className="gr-btn primary tone-gold" onClick={() => setOpen(true)}>
+      <button className="gr-btn primary" onClick={() => setOpen(true)}>
         + New deck
       </button>
     );
@@ -234,7 +234,7 @@ function DeckForm({ classes, onAdd }) {
         </select>
       </div>
       <button
-        className="gr-btn primary tone-gold"
+        className="gr-btn primary"
         disabled={!name.trim()}
         onClick={() => {
           onAdd(name.trim(), classId || null);
@@ -283,7 +283,7 @@ function CardForm({ deckId, onAdd }) {
           onKeyDown={(e) => e.key === "Enter" && submit()}
         />
       </div>
-      <button className="gr-btn primary tone-gold" disabled={!front.trim() || !back.trim()} onClick={submit}>
+      <button className="gr-btn primary" disabled={!front.trim() || !back.trim()} onClick={submit}>
         Add card
       </button>
     </div>
@@ -324,7 +324,7 @@ function ReviewSession({ deck, onExit, onFinish }) {
           <button className="gr-btn small ghost" onClick={() => mark(false)}>
             Still learning
           </button>
-          <button className="gr-btn small primary tone-gold" onClick={() => mark(true)}>
+          <button className="gr-btn small primary" onClick={() => mark(true)}>
             Got it
           </button>
         </div>
@@ -358,7 +358,7 @@ function DeckCard({ deck, classes, onRemoveDeck, onAddCard, onRemoveCard, onFini
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button
-            className="gr-btn small primary tone-gold"
+            className="gr-btn small primary"
             disabled={!deck.cards.length}
             onClick={() => {
               setReviewing(true);
@@ -434,7 +434,7 @@ function FlashcardsSection() {
 
   return (
     <div className="gr-card panel">
-      <div className="gr-panel-head tone-gold">
+      <div className="gr-panel-head">
         <Layers /> Flashcard Decks
       </div>
       <p className="gr-card-sub">Build your own decks for active recall — optionally tied to a class.</p>
@@ -470,7 +470,7 @@ export default function StudyHub() {
     <div>
       <div className="gr-section-head">
         <div>
-          <span className="gr-eyebrow tone-gold">The Training Ground</span>
+          <span className="gr-eyebrow">The Training Ground</span>
           <h2>Study Hub</h2>
           <p>Drill flashcards, run a focus block, and bank XP with quick quizzes. Looking for your files? Head to the Files page.</p>
         </div>

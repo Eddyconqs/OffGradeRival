@@ -79,7 +79,7 @@ function GifPicker({ onPick, onClose }) {
         <div className="gr-card-sub" style={{ margin: 0 }}>Loading…</div>
       )}
       {giphyConfigured() && error && (
-        <div className="gr-card-sub" style={{ margin: 0, color: "var(--coral-text)" }}>{error}</div>
+        <div className="gr-card-sub" style={{ margin: 0, color: "var(--danger-text)" }}>{error}</div>
       )}
       {giphyConfigured() && !loading && !error && results.length === 0 && (
         <div className="gr-card-sub" style={{ margin: 0 }}>No GIFs found — try a different search.</div>
@@ -120,7 +120,7 @@ function Composer({ onPost }) {
 
   return (
     <div className="gr-card panel" style={{ marginBottom: 18 }}>
-      <div className="gr-panel-head tone-coral">
+      <div className="gr-panel-head">
         <Megaphone /> Share Something
       </div>
       <p className="gr-card-sub">Only your accepted friends will see this in their feed.</p>
@@ -152,7 +152,7 @@ function Composer({ onPost }) {
         <button className="gr-btn small ghost" onClick={() => setPickerOpen((v) => !v)}>
           <ImageIcon size={14} /> {gif ? "Change GIF" : "Add GIF"}
         </button>
-        <button className="gr-btn primary tone-coral" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
+        <button className="gr-btn primary" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
           Post
         </button>
       </div>
@@ -211,7 +211,7 @@ function CommentComposer({ onSubmit }) {
         <button className="gr-btn small ghost" onClick={() => setPickerOpen((v) => !v)} aria-label="Add GIF">
           <ImageIcon size={14} />
         </button>
-        <button className="gr-btn small primary tone-coral" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
+        <button className="gr-btn small primary" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
           Reply
         </button>
       </div>
@@ -325,7 +325,7 @@ export default function Feed() {
     <div>
       <div className="gr-section-head">
         <div>
-          <span className="gr-eyebrow tone-coral">The Locker Room</span>
+          <span className="gr-eyebrow">The Locker Room</span>
           <h2>Feed</h2>
           <p>Updates from your circle — text, GIFs, and whatever's worth sharing.</p>
         </div>

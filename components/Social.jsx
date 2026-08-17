@@ -66,7 +66,7 @@ function FriendSearch({ friends, incomingRequests, outgoingRequests, onSend }) {
                 {c.name}
               </span>
               <button
-                className="gr-btn small primary tone-violet"
+                className="gr-btn small primary"
                 onClick={() => {
                   onSend(c.id, c.name);
                   setQuery("");
@@ -101,7 +101,7 @@ function Leaderboard({ friends, profile, gpa, levelInfo }) {
 
   return (
     <div className="gr-card panel">
-      <div className="gr-panel-head tone-violet">
+      <div className="gr-panel-head">
         <Trophy /> Leaderboard
       </div>
       <p className="gr-card-sub">Ranked by GPA across your circle — friends keeping theirs private show up unranked.</p>
@@ -127,7 +127,7 @@ function Leaderboard({ friends, profile, gpa, levelInfo }) {
               </div>
               <div>
                 <div className="who">
-                  {r.name} {r.you && <span style={{ color: "var(--gold-text)" }}>· you</span>}
+                  {r.name} {r.you && <span style={{ color: "var(--accent-text)" }}>· you</span>}
                 </div>
                 <div className="lvl">Lv. {r.level}</div>
               </div>
@@ -161,7 +161,7 @@ function GroupFilesLink({ group, files, onOpenFiles }) {
       <p className="gr-card-sub" style={{ margin: "0 0 10px" }}>
         Uploading and sharing files now happens on the Files page — pick this group as the destination.
       </p>
-      <button className="gr-btn small primary tone-violet" onClick={() => onOpenFiles(group.id)}>
+      <button className="gr-btn small primary" onClick={() => onOpenFiles(group.id)}>
         Open {group.name}'s files
       </button>
     </div>
@@ -193,7 +193,7 @@ function GroupNotes({ group, onAddNote, onRemoveNote }) {
             onKeyDown={(e) => e.key === "Enter" && submit()}
           />
         </div>
-        <button className="gr-btn small primary tone-violet" disabled={!draft.trim()} onClick={submit}>
+        <button className="gr-btn small primary" disabled={!draft.trim()} onClick={submit}>
           Post
         </button>
       </div>
@@ -259,7 +259,7 @@ function GroupReminders({ group, onAddReminder, onToggleReminder, onRemoveRemind
           <label>Due (optional)</label>
           <input type="date" value={due} onChange={(e) => setDue(e.target.value)} />
         </div>
-        <button className="gr-btn small primary tone-violet" disabled={!text.trim()} onClick={submit}>
+        <button className="gr-btn small primary" disabled={!text.trim()} onClick={submit}>
           Add
         </button>
       </div>
@@ -344,7 +344,7 @@ function GroupCard({
                 }}
                 style={{ flex: 1, minWidth: 120 }}
               />
-              <button className="gr-btn small primary tone-violet" disabled={!nameDraft.trim()} onClick={saveRename}>
+              <button className="gr-btn small primary" disabled={!nameDraft.trim()} onClick={saveRename}>
                 Save
               </button>
               <button className="gr-btn small ghost" onClick={() => setEditingName(false)}>
@@ -488,7 +488,7 @@ function NewGroupForm({ friends, onAdd }) {
 
   if (!open) {
     return (
-      <button className="gr-btn primary tone-violet" onClick={() => setOpen(true)}>
+      <button className="gr-btn primary" onClick={() => setOpen(true)}>
         + Create a study group
       </button>
     );
@@ -508,7 +508,7 @@ function NewGroupForm({ friends, onAdd }) {
             key={f.id}
             className="gr-person-chip"
             style={{
-              borderColor: selected.includes(f.id) ? "var(--cyan)" : undefined,
+              borderColor: selected.includes(f.id) ? "var(--accent)" : undefined,
               cursor: "pointer",
             }}
             onClick={() => toggle(f.id)}
@@ -520,7 +520,7 @@ function NewGroupForm({ friends, onAdd }) {
       </div>
       <div className="gr-row">
         <button
-          className="gr-btn primary tone-violet"
+          className="gr-btn primary"
           disabled={!name.trim()}
           onClick={() => {
             onAdd(name.trim(), selected);
@@ -582,7 +582,7 @@ export default function Social({ onNavigate }) {
     <div>
       <div className="gr-section-head">
         <div>
-          <span className="gr-eyebrow tone-violet">The Rivalry Wing</span>
+          <span className="gr-eyebrow">The Rivalry Wing</span>
           <h2>Friends & Groups</h2>
           <p>Real connections — find someone by their full name and send a request to start racing GPAs.</p>
         </div>
@@ -591,7 +591,7 @@ export default function Social({ onNavigate }) {
       <div className="gr-grid cols-2">
         <div>
           <div className="gr-card panel" style={{ marginBottom: 18 }}>
-            <div className="gr-panel-head tone-violet">
+            <div className="gr-panel-head">
               <Swords /> Your Rivals
             </div>
             <p className="gr-card-sub">Compete for the highest GPA — on your terms.</p>
@@ -619,7 +619,7 @@ export default function Social({ onNavigate }) {
                     <span>{r.name}</span>
                     <span style={{ display: "flex", gap: 6 }}>
                       <button
-                        className="gr-btn small primary tone-violet"
+                        className="gr-btn small primary"
                         onClick={() => acceptFriendRequest(r.friendshipId, r.name)}
                       >
                         Accept
@@ -673,7 +673,7 @@ export default function Social({ onNavigate }) {
           </div>
 
           <div className="gr-card panel">
-            <div className="gr-panel-head tone-violet">
+            <div className="gr-panel-head">
               <Users /> Study Groups
             </div>
             <p className="gr-card-sub">Shared spaces for files, notes, and reminders.</p>

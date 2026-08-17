@@ -351,7 +351,7 @@ function RivalryRadarBoard({ as: Wrapper = Board, friends, profile, gpa, onNavig
           <div className="who">{profile.name || "You"}</div>
           <SevenSeg value={gpa.toFixed(2)} color="var(--led-red)" size={1.5} />
         </div>
-        <Arrow style={{ color: ahead ? "var(--mint-text)" : "var(--amber-text)", flex: "none" }} />
+        <Arrow style={{ color: ahead ? "var(--success-text)" : "var(--danger-text)", flex: "none" }} />
         <div className="gr-rivalry-side">
           <div className="who">{closest.name}</div>
           <SevenSeg value={closest.gpa.toFixed(2)} color="var(--led-red)" size={1.5} />

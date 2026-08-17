@@ -21,7 +21,7 @@ function FileUpload({ destination, classId, onDestinationChange, onClassChange, 
 
   return (
     <div className="gr-card panel">
-      <div className="gr-panel-head tone-mint">
+      <div className="gr-panel-head">
         <UploadCloud /> Upload a File
       </div>
       <p className="gr-card-sub">Keep it to yourself, or share it straight to a study group — pick a destination below.</p>
@@ -62,7 +62,7 @@ function FileUpload({ destination, classId, onDestinationChange, onClassChange, 
           setDragOver(false);
           if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
         }}
-        style={{ borderColor: dragOver ? "var(--gold)" : undefined }}
+        style={{ borderColor: dragOver ? "var(--accent)" : undefined }}
       >
         <input
           ref={inputRef}
@@ -183,7 +183,7 @@ export default function Files({ initialGroupId }) {
     <div>
       <div className="gr-section-head">
         <div>
-          <span className="gr-eyebrow tone-mint">The Equipment Room</span>
+          <span className="gr-eyebrow">The Equipment Room</span>
           <h2>Files</h2>
           <p>Upload once — keep it personal or share it straight to a study group. Everything lives here.</p>
         </div>
@@ -205,7 +205,7 @@ export default function Files({ initialGroupId }) {
           {tabs.map((t) => (
             <button
               key={t.id}
-              className={`gr-btn small ${tab === t.id ? "primary tone-mint" : "ghost"}`}
+              className={`gr-btn small ${tab === t.id ? "primary" : "ghost"}`}
               onClick={() => setTab(t.id)}
             >
               {t.label} ({t.count})

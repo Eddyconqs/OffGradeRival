@@ -13,7 +13,7 @@ function NewClassForm({ onAdd }) {
 
   if (!open) {
     return (
-      <button className="gr-btn primary tone-violet" onClick={() => setOpen(true)}>
+      <button className="gr-btn primary" onClick={() => setOpen(true)}>
         + Add a class
       </button>
     );
@@ -21,7 +21,7 @@ function NewClassForm({ onAdd }) {
 
   return (
     <div className="gr-card panel" style={{ marginBottom: 16 }}>
-      <div className="gr-panel-head tone-violet">
+      <div className="gr-panel-head">
         <BookOpen /> New Class
       </div>
       <div className="gr-row">
@@ -34,7 +34,7 @@ function NewClassForm({ onAdd }) {
           <input type="number" min="1" max="6" value={credits} onChange={(e) => setCredits(e.target.value)} />
         </div>
         <button
-          className="gr-btn primary tone-violet"
+          className="gr-btn primary"
           disabled={!name.trim()}
           onClick={() => {
             onAdd(name.trim(), PALETTE[Math.floor(Math.random() * PALETTE.length)], credits);
@@ -87,7 +87,7 @@ function AddAssignmentRow({ classId, categories, onAdd }) {
           <input type="number" value={max} onChange={(e) => setMax(e.target.value)} />
         </div>
         <button
-          className="gr-btn small primary tone-violet"
+          className="gr-btn small primary"
           disabled={!name.trim() || score === "" || !max || !categoryId}
           onClick={() => {
             onAdd(classId, categoryId, name.trim(), score, max, shareToFeed);
@@ -129,7 +129,7 @@ function WhatIf({ klass }) {
         <div className="gr-whatif-banner" style={{ marginTop: 10, flexDirection: "column", alignItems: "stretch", gap: 8 }}>
           <div className="gr-row" style={{ alignItems: "flex-end" }}>
             <div className="gr-field" style={{ minWidth: 120 }}>
-              <label style={{ color: "var(--violet)" }}>Category</label>
+              <label>Category</label>
               <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
                 {klass.categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -139,11 +139,11 @@ function WhatIf({ klass }) {
               </select>
             </div>
             <div className="gr-field" style={{ width: 80 }}>
-              <label style={{ color: "var(--violet)" }}>Score</label>
+              <label>Score</label>
               <input type="number" value={score} onChange={(e) => setScore(e.target.value)} />
             </div>
             <div className="gr-field" style={{ width: 80 }}>
-              <label style={{ color: "var(--violet)" }}>Out of</label>
+              <label>Out of</label>
               <input type="number" value={max} onChange={(e) => setMax(e.target.value)} />
             </div>
           </div>
@@ -180,7 +180,7 @@ function ClassCard({ klass }) {
           <h3>{klass.name}</h3>
           <span className="gr-tag">{klass.credits} cr</span>
           {totalWeight !== 100 && (
-            <span className="gr-tag" style={{ color: "var(--coral)", borderColor: "var(--coral)" }}>
+            <span className="gr-tag" style={{ color: "var(--danger)", borderColor: "var(--danger)" }}>
               weights sum to {totalWeight}%
             </span>
           )}
@@ -270,7 +270,7 @@ function ClassCard({ klass }) {
               <input type="number" value={catWeight} onChange={(e) => setCatWeight(e.target.value)} />
             </div>
             <button
-              className="gr-btn small primary tone-violet"
+              className="gr-btn small primary"
               disabled={!catName.trim()}
               onClick={() => {
                 addCategory(klass.id, catName.trim(), catWeight);
@@ -309,7 +309,7 @@ export default function Classes() {
     <div>
       <div className="gr-section-head">
         <div>
-          <span className="gr-eyebrow tone-violet">The Compete Zone</span>
+          <span className="gr-eyebrow">The Compete Zone</span>
           <h2>Classes & Grades</h2>
           <p>Weight your categories, log real scores, and project what comes next.</p>
         </div>
