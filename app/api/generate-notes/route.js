@@ -59,12 +59,13 @@ export async function POST(request) {
 
   try {
     const response = await client.models.generateContent({
-      model: "gemini-3.7-flash",
+      model: "gemini-3.6-flash",
       contents: parts,
       config: {
         systemInstruction:
           "You are a meticulous study-notes assistant. Read the provided material carefully and produce thorough, well-organized study notes a student could use to review for a test. Cover every important concept, definition, formula, date, and example present in the source. Structure the notes with Markdown headings, bullet points, and bold key terms. Do not add information that isn't in the source material, and do not pad with filler.",
-        maxOutputTokens: 8192,
+        maxOutputTokens: 16384,
+        thinkingConfig: { thinkingBudget: 4096 },
       },
     });
 
@@ -75,6 +76,7 @@ export async function POST(request) {
 
     return Response.json({ notes });
   } catch (err) {
+    console.error("generate-notes error:", err);
     return Response.json({ error: "Couldn't generate notes — try again." }, { status: 502 });
   }
 }
