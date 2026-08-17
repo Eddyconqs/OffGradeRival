@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { lerpKeyframes } from "../lib/scrollMotion";
 import ScrollStory from "./ScrollStory";
+import Radar from "./Radar";
+import SplitFlapText from "./SplitFlapText";
 
 /* Hero and Unify aren't pinned (no added scroll height, no scroll-jacking)
    — they ride their own natural scroll distance. Hero reads its progress
@@ -70,11 +72,41 @@ export default function Landing({ onGetStarted, onLogin }) {
           className="gr-landing-hero"
           style={reduceMotion ? undefined : heroMotion}
         >
+          <div className="gr-landing-radar" aria-hidden="true">
+            <Radar
+              color="#f26a21"
+              backgroundColor="#000000"
+              speed={0.35}
+              scale={0.6}
+              ringCount={6}
+              spokeCount={8}
+              ringThickness={0.04}
+              spokeThickness={0.008}
+              sweepSpeed={0.5}
+              sweepWidth={3}
+              sweepLobes={1}
+              falloff={2.2}
+              brightness={0.55}
+              enableMouseInteraction={false}
+            />
+          </div>
           <div className="gr-landing-hero-glow" aria-hidden="true" />
           <div className="gr-stagger">
             <p className="gr-landing-tagline">
-              <span className="compete">Compete.</span> <span className="improve">Improve.</span>{" "}
-              <span className="celebrate">Celebrate.</span>
+              {reduceMotion ? (
+                <>
+                  <span className="compete">Compete.</span> <span className="improve">Improve.</span>{" "}
+                  <span className="celebrate">Celebrate.</span>
+                </>
+              ) : (
+                <SplitFlapText
+                  segments={[
+                    { text: "Compete.", className: "compete" },
+                    { text: "Improve.", className: "improve" },
+                    { text: "Celebrate.", className: "celebrate" },
+                  ]}
+                />
+              )}
             </p>
             <h1 className="gr-landing-headline">
               GRADE<span className="accent"> ARENA</span>

@@ -2318,6 +2318,20 @@ a:focus-visible {
   z-index: -1;
 }
 
+/* Radar sweep — a slow, restrained "ping" behind the hero. Deliberately
+   echoes the Dashboard's Rivalry Radar widget rather than being a random
+   decorative effect. Sits behind the glow (z-index -2), fades at the
+   edges via a mask so it never hard-crops against the page. */
+.gr-landing-radar {
+  position: absolute;
+  inset: -20% -10%;
+  pointer-events: none;
+  z-index: -2;
+  opacity: 0.45;
+  mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 70%);
+}
+
 .gr-landing-tagline {
   font-family: var(--mono);
   font-size: clamp(12px, 1.6vw, 16px);
@@ -2335,6 +2349,32 @@ a:focus-visible {
 }
 .gr-landing-tagline .celebrate {
   color: #ffb347;
+}
+
+.gr-flap-char {
+  display: inline-block;
+  min-width: 0.7em;
+}
+
+.gr-flap-char.settled {
+  animation: gr-flap-settle 0.22s ease-out;
+}
+
+@keyframes gr-flap-settle {
+  0% {
+    opacity: 0.25;
+    transform: translateY(-3px) scaleY(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gr-flap-char.settled {
+    animation: none;
+  }
 }
 
 .gr-landing-headline {
