@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore, XP_RULES } from "../lib/store";
 import { pickQuiz } from "../lib/quizBank";
-import { formatBytes, fileExt, ingestFiles } from "../lib/files";
 import SevenSeg from "./SevenSeg";
 
 function todayStr() {
@@ -124,142 +123,6 @@ function FocusTimer() {
           Reset
         </button>
       </div>
-    </div>
-  );
-}
-
-function FileDrop() {
-  const { addFile, classes } = useStore();
-  const inputRef = useRef(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [classId, setClassId] = useState("");
-
-  const handleFiles = (fileList) => ingestFiles(fileList, addFile, { classId: classId || null });
-
-  return (
-    <div>
-      <div className="gr-field" style={{ marginBottom: 10 }}>
-        <label>Course (optional)</label>
-        <select value={classId} onChange={(e) => setClassId(e.target.value)}>
-          <option value="">No course</option>
-          {classes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div
-        className="gr-dropzone"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
-        }}
-        style={{ borderColor: dragOver ? "var(--gold)" : undefined }}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          style={{ display: "none" }}
-          onChange={(e) => e.target.files?.length && handleFiles(e.target.files)}
-        />
-        Drop a study guide or notes here, or click to browse · +15 XP per upload
-      </div>
-    </div>
-  );
-}
-
-const AI_NOTES_SUPPORTED = /^(application\/pdf|image\/(jpeg|png|gif|webp)|text\/)/;
-
-function FileRow({ file, klass, onRemove, onGenerateNotes }) {
-  const [generating, setGenerating] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
-  const supported = file.type && AI_NOTES_SUPPORTED.test(file.type) && file.dataUrl;
-
-  const generate = async () => {
-    setGenerating(true);
-    await onGenerateNotes(file.id);
-    setGenerating(false);
-    setShowNotes(true);
-  };
-
-  return (
-    <div className="gr-file-row" style={{ flexDirection: "column", alignItems: "stretch" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div className="gr-file-meta">
-          <div className="gr-file-icon">{fileExt(file.name)}</div>
-          <div>
-            <div className="gr-file-name">{file.name}</div>
-            <div className="gr-file-sub">
-              {formatBytes(file.size)} · {new Date(file.at).toLocaleDateString()}
-              {klass && (
-                <span className="gr-tag" style={{ marginLeft: 8 }}>
-                  <span className="gr-swatch" style={{ background: klass.color, marginRight: 4 }} />
-                  {klass.name}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          {file.aiNotes && (
-            <button className="gr-btn small ghost" onClick={() => setShowNotes((v) => !v)}>
-              {showNotes ? "Hide notes" : "View notes"}
-            </button>
-          )}
-          {supported && (
-            <button className="gr-btn small ghost" disabled={generating} onClick={generate}>
-              {generating ? "Generating…" : file.aiNotes ? "Regenerate notes" : "Generate notes"}
-            </button>
-          )}
-          {file.dataUrl && (
-            <a className="gr-btn small ghost" href={file.dataUrl} download={file.name}>
-              Download
-            </a>
-          )}
-          <button className="gr-btn small danger" onClick={() => onRemove(file.id)}>
-            Remove
-          </button>
-        </div>
-      </div>
-      {showNotes && file.aiNotes && (
-        <div className="gr-ai-notes">{file.aiNotes}</div>
-      )}
-    </div>
-  );
-}
-
-function FileList() {
-  const { files, classes, removeFile, generateFileNotes } = useStore();
-  const personal = files.filter((f) => !f.groupId);
-  if (!personal.length) {
-    return (
-      <div className="gr-empty">
-        <b>No personal files yet</b>
-        Upload a study guide, notes, or a practice test. Files shared inside a study group live on
-        that group's page instead.
-      </div>
-    );
-  }
-  return (
-    <div>
-      {personal.map((f) => (
-        <FileRow
-          key={f.id}
-          file={f}
-          klass={classes.find((c) => c.id === f.classId)}
-          onRemove={removeFile}
-          onGenerateNotes={generateFileNotes}
-        />
-      ))}
     </div>
   );
 }
@@ -603,22 +466,13 @@ export default function StudyHub() {
       <div className="gr-section-head">
         <div>
           <h2>Study Hub</h2>
-          <p>Trade files, drill flashcards, run a focus block, and bank XP with quick quizzes.</p>
+          <p>Drill flashcards, run a focus block, and bank XP with quick quizzes. Looking for your files? Head to the Files page.</p>
         </div>
       </div>
 
       <StudyScoreboard />
 
-      <div className="gr-grid cols-3" style={{ marginBottom: 20 }}>
-        <div className="gr-card">
-          <div className="gr-card-title">Shared files</div>
-          <p className="gr-card-sub">Study guides, notes, and practice sets. Stored on this device.</p>
-          <FileDrop />
-          <div style={{ marginTop: 16 }}>
-            <FileList />
-          </div>
-        </div>
-
+      <div className="gr-grid cols-2" style={{ marginBottom: 20 }}>
         <Quiz />
         <FocusTimer />
       </div>

@@ -13,6 +13,7 @@ import Classes from "./Classes";
 import Social from "./Social";
 import StudyHub from "./StudyHub";
 import Feed from "./Feed";
+import Files from "./Files";
 
 function Toast() {
   const { toast } = useStore();
@@ -61,6 +62,12 @@ function Shell() {
   const { mounted } = useStore();
   const [tab, setTab] = useState("dashboard");
   const [showAuth, setShowAuth] = useState(false);
+  const [filesGroupId, setFilesGroupId] = useState(null);
+
+  const navigate = (nextTab, opts) => {
+    if (nextTab === "files") setFilesGroupId(opts?.groupId ?? null);
+    setTab(nextTab);
+  };
 
   if (authLoading) {
     return <div className="gr-boot">Loading Grade Arena…</div>;
@@ -79,20 +86,21 @@ function Shell() {
 
   return (
     <div className="gr-app">
-      <Sidebar active={tab} onChange={setTab} />
+      <Sidebar active={tab} onChange={navigate} />
       <div className="gr-main">
         <MobileTopbar />
         <div className="gr-shell">
-          {tab === "dashboard" && <Dashboard onNavigate={setTab} />}
+          {tab === "dashboard" && <Dashboard onNavigate={navigate} />}
           {tab === "classes" && <Classes />}
-          {tab === "social" && <Social />}
+          {tab === "social" && <Social onNavigate={navigate} />}
           {tab === "study" && <StudyHub />}
+          {tab === "files" && <Files initialGroupId={filesGroupId} />}
           {tab === "feed" && <Feed />}
         </div>
       </div>
 
-      <BottomNav active={tab} onChange={setTab} />
-      <Fab onClick={() => setTab("classes")} />
+      <BottomNav active={tab} onChange={navigate} />
+      <Fab onClick={() => navigate("classes")} />
 
       <Toast />
     </div>

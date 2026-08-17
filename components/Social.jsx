@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../lib/store";
 import { useAuth } from "../lib/auth";
-import { formatBytes, fileExt, ingestFiles } from "../lib/files";
 
 function initials(name) {
   return (name || "?")
@@ -143,11 +142,8 @@ function Leaderboard({ friends, profile, gpa, levelInfo }) {
   );
 }
 
-function GroupFiles({ group, files, onAddFile, onRemoveFile }) {
-  const inputRef = useRef(null);
-  const [dragOver, setDragOver] = useState(false);
+function GroupFilesLink({ group, files, onOpenFiles }) {
   const groupFiles = files.filter((f) => f.groupId === group.id);
-  const handleFiles = (fileList) => ingestFiles(fileList, onAddFile, { groupId: group.id });
 
   return (
     <div className="gr-category">
@@ -157,60 +153,12 @@ function GroupFiles({ group, files, onAddFile, onRemoveFile }) {
           {groupFiles.length} file{groupFiles.length === 1 ? "" : "s"}
         </span>
       </div>
-      <div
-        className="gr-dropzone"
-        style={{ padding: 14, marginBottom: 10, borderColor: dragOver ? "var(--cyan)" : undefined }}
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
-        }}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          style={{ display: "none" }}
-          onChange={(e) => e.target.files?.length && handleFiles(e.target.files)}
-        />
-        Drop a file to share with this group, or click to browse · +15 XP per upload
-      </div>
-      {groupFiles.length === 0 ? (
-        <div className="gr-empty" style={{ padding: "16px 10px" }}>
-          <b>No files yet</b>
-          Drop something above to share it with the group.
-        </div>
-      ) : (
-        groupFiles.map((f) => (
-          <div key={f.id} className="gr-file-row">
-            <div className="gr-file-meta">
-              <div className="gr-file-icon">{fileExt(f.name)}</div>
-              <div>
-                <div className="gr-file-name">{f.name}</div>
-                <div className="gr-file-sub">
-                  {formatBytes(f.size)} · {new Date(f.at).toLocaleDateString()}
-                </div>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              {f.dataUrl && (
-                <a className="gr-btn small ghost" href={f.dataUrl} download={f.name}>
-                  Download
-                </a>
-              )}
-              <button className="gr-btn small danger" onClick={() => onRemoveFile(f.id)}>
-                Remove
-              </button>
-            </div>
-          </div>
-        ))
-      )}
+      <p className="gr-card-sub" style={{ margin: "0 0 10px" }}>
+        Uploading and sharing files now happens on the Files page — pick this group as the destination.
+      </p>
+      <button className="gr-btn small primary" onClick={() => onOpenFiles(group.id)}>
+        Open {group.name}'s files
+      </button>
     </div>
   );
 }
@@ -352,8 +300,7 @@ function GroupCard({
   onAddMember,
   onRemoveMember,
   onRemoveGroup,
-  onAddFile,
-  onRemoveFile,
+  onOpenFiles,
   onAddNote,
   onRemoveNote,
   onAddReminder,
@@ -512,7 +459,7 @@ function GroupCard({
             )}
           </div>
 
-          <GroupFiles group={group} files={files} onAddFile={onAddFile} onRemoveFile={onRemoveFile} />
+          <GroupFilesLink group={group} files={files} onOpenFiles={onOpenFiles} />
           <GroupNotes group={group} onAddNote={onAddNote} onRemoveNote={onRemoveNote} />
           <GroupReminders
             group={group}
@@ -587,7 +534,7 @@ function NewGroupForm({ friends, onAdd }) {
   );
 }
 
-export default function Social() {
+export default function Social({ onNavigate }) {
   const {
     friends,
     incomingRequests,
@@ -608,8 +555,6 @@ export default function Social() {
     toggleGroupReminder,
     removeGroupReminder,
     files,
-    addFile,
-    removeFile,
     profile,
     gpa,
     levelInfo,
@@ -734,8 +679,7 @@ export default function Social() {
                   onAddMember={addGroupMember}
                   onRemoveMember={removeGroupMember}
                   onRemoveGroup={removeGroup}
-                  onAddFile={addFile}
-                  onRemoveFile={removeFile}
+                  onOpenFiles={(groupId) => onNavigate("files", { groupId })}
                   onAddNote={addGroupNote}
                   onRemoveNote={removeGroupNote}
                   onAddReminder={addGroupReminder}

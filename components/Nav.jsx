@@ -7,6 +7,7 @@ import {
   Brain,
   Users,
   Rss,
+  FolderOpen,
   Sun,
   Moon,
   Plus,
@@ -19,6 +20,7 @@ const TABS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "classes", label: "My Courses", icon: BookOpen },
   { id: "study", label: "Study Space", icon: Brain },
+  { id: "files", label: "Files", icon: FolderOpen },
   { id: "feed", label: "Feed", icon: Rss },
   { id: "social", label: "Groups", icon: Users },
 ];

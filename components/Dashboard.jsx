@@ -456,7 +456,7 @@ function TeamStatsBoard({ classes, files, friends, onNavigate }) {
             </div>
             <div className="k">Classes tracked</div>
           </button>
-          <button className="gr-led-stat" onClick={() => onNavigate("study")}>
+          <button className="gr-led-stat" onClick={() => onNavigate("files")}>
             <div className="n">
               <SevenSeg value={String(files.length)} color="var(--led-red)" size={1.6} />
             </div>
