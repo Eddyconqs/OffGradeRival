@@ -47,8 +47,8 @@ const FLAT_CAM = [
    ============================================================ */
 
 function SceneTitle({ progress, word, copy, color }) {
-  const opacity = useTransform(progress, (v) => lerpKeyframes(v, [0, 0.1, 0.2], [0, 1, 0]));
-  const scale = useTransform(progress, (v) => lerpKeyframes(v, [0, 0.2], [0.94, 1.06]));
+  const opacity = useTransform(progress, (v) => lerpKeyframes(v, [0, 0.1, 0.32, 0.4], [0, 1, 1, 0]));
+  const scale = useTransform(progress, (v) => lerpKeyframes(v, [0, 0.1, 0.4], [0.94, 1.02, 1]));
   return (
     <motion.div className="gr-cine-title" style={{ opacity, scale }}>
       <h2 className={`gr-story-word ${color}`}>{word}</h2>
