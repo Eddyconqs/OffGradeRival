@@ -148,7 +148,8 @@ function WhatIf({ klass }) {
 }
 
 function ClassCard({ klass }) {
-  const { removeClass, addAssignment, removeAssignment, addCategory } = useStore();
+  const { removeClass, addAssignment, removeAssignment, addCategory, updateCategoryWeight, removeCategory } =
+    useStore();
   const [showAddCat, setShowAddCat] = useState(false);
   const [catName, setCatName] = useState("");
   const [catWeight, setCatWeight] = useState(10);
@@ -196,8 +197,28 @@ function ClassCard({ klass }) {
         return (
           <div key={cat.id} className="gr-category">
             <div className="gr-category-head">
-              <span>
-                {cat.name} · {cat.weight}% weight
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {cat.name} ·
+                <input
+                  key={cat.weight}
+                  type="number"
+                  defaultValue={cat.weight}
+                  onBlur={(e) => {
+                    const next = Number(e.target.value);
+                    if (!Number.isNaN(next) && next !== cat.weight) {
+                      updateCategoryWeight(klass.id, cat.id, next);
+                    }
+                  }}
+                  style={{ width: 52 }}
+                />
+                % weight
+                <button
+                  className="gr-btn small ghost"
+                  onClick={() => removeCategory(klass.id, cat.id)}
+                  title="Remove category"
+                >
+                  ✕
+                </button>
               </span>
               <span>{items.length} logged</span>
             </div>

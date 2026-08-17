@@ -10,207 +10,341 @@ import {
   useInView,
   animate,
 } from "framer-motion";
-import { lerpKeyframes, useSegmentMotion } from "../lib/scrollMotion";
+import { Swords, ArrowUpRight, Star, Flame, ThumbsUp, Trophy } from "lucide-react";
+import { lerpKeyframes, useCameraPath, useGate, useMotionValueState } from "../lib/scrollMotion";
+
+// On the pinned desktop stage the camera has a whole 100vh, 1180px-wide
+// canvas to push around in. On the mobile/reduced-motion fallback the
+// same scenes render at natural page width in normal flow, where that
+// same zoom math would just crop content against a much narrower frame
+// — so that path keeps the camera flat (no zoom) and leans on the live
+// content animations (button press, counters, new rows) instead.
+const FLAT_CAM = [
+  { at: 0, scale: 1, x: 50, y: 50 },
+  { at: 1, scale: 1, x: 50, y: 50 },
+];
 
 /* ============================================================
-   The Compete -> Improve -> Celebrate scroll story. Desktop (and
-   anyone without prefers-reduced-motion set) gets a pinned,
-   scroll-scrubbed sequence: one tall (300vh) wrapper with a
-   sticky 100vh stage inside it, where scroll position drives
-   opacity/scale/position directly via Framer Motion's
-   useScroll + useTransform — the animation IS the scroll, not
-   triggered by it.
+   The Compete -> Improve -> Celebrate scroll story: one pinned,
+   scroll-scrubbed cinematic sequence. Each act is real, live-coded
+   Grade Arena UI filling the whole stage (no screenshots, no small
+   framed cards) — a single continuous "camera" (scale + transform
+   origin, driven straight off scroll position via useCameraPath)
+   pushes into specific real elements while they animate as if the
+   product is actually being used: a button gets pressed, a rank
+   climbs, a grade lands and the average ticks up, a post drops into
+   the feed and reactions count in. Scrolling forward plays the shot
+   forward; scrolling back reverses it — true scrubbing, not a
+   triggered animation.
 
-   Each phase is a short sequence of REAL screenshots of the real
-   Grade Arena app (Dashboard, Classes, and two small real components
-   built for the parts of the story the app doesn't have live yet —
-   ChallengeInviteCard and FeedPreview, styled with the app's actual
-   design system, not illustrated). Scrolling zooms the camera into a
-   specific real detail on each screenshot — the Accept button, the
-   grade that just landed, the reaction counts — then the next beat
-   swaps in the next real screenshot. Scrolling forward plays the
-   sequence forward; scrolling back reverses it — true scrubbing.
-
-   Mobile and reduced-motion both get a simpler fallback: the same
-   three scenes, stacked normally, each auto-playing its own zoom
-   sequence once when it scrolls into view (no pinning, no
-   scroll-jacking) — true scroll-jacking is more likely to feel
-   broken than premium on touch devices, and must be skippable for
-   anyone who asked for less motion, in which case the clip resolves
-   straight to its final frame instead of animating.
+   Mobile and reduced-motion both get the same three scenes, full
+   height, stacked in normal flow, each auto-playing its camera path
+   once as it scrolls into view (no pinning, no scroll-jacking) — true
+   scroll-jacking is more likely to feel broken than premium on touch
+   devices, and must be skippable for anyone who asked for less
+   motion, in which case the scene resolves straight to its final
+   frame instead of animating.
    ============================================================ */
 
-const SEG = [0, 1 / 3, 2 / 3, 1];
-
-function Beat({ progress, index, children }) {
-  const { opacity, y } = useSegmentMotion(progress, SEG[index], SEG[index + 1], {
-    fadeIn: index > 0,
-    fadeOut: index < 2,
-  });
+function SceneTitle({ progress, word, copy, color }) {
+  const opacity = useTransform(progress, (v) => lerpKeyframes(v, [0, 0.1, 0.2], [0, 1, 0]));
+  const scale = useTransform(progress, (v) => lerpKeyframes(v, [0, 0.2], [0.94, 1.06]));
   return (
-    <motion.div className="gr-scene-beat" style={{ opacity, y }}>
-      {children}
+    <motion.div className="gr-cine-title" style={{ opacity, scale }}>
+      <h2 className={`gr-story-word ${color}`}>{word}</h2>
+      <p className="gr-story-phase-copy">{copy}</p>
     </motion.div>
   );
 }
 
-// One real screenshot, zoomed toward `origin` (a CSS transform-origin
-// percentage pair pointing at the specific real detail this beat is
-// about) as the beat plays. `frame` picks how it sits in its window:
-// "screen" full-bleed-crops a real full-page app screenshot; "card" is
-// for the small standalone component screenshots, shown whole.
-function ZoomShot({ progress, index, src, origin, from, to, frame, chrome, alt }) {
-  const scale = useTransform(progress, (v) =>
-    lerpKeyframes(v, [SEG[index], SEG[index + 1]], [from, to])
+function CompeteScene({ progress, cinematic = true }) {
+  const cam = useCameraPath(
+    progress,
+    cinematic
+      ? [
+          { at: 0, scale: 1, x: 50, y: 50 },
+          { at: 0.22, scale: 1.04, x: 50, y: 50 },
+          { at: 0.48, scale: 1.5, x: 40, y: 44 },
+          { at: 0.72, scale: 1.3, x: 50, y: 46 },
+          { at: 1, scale: 1.16, x: 46, y: 44 },
+        ]
+      : FLAT_CAM
   );
+  // The side panel (leaderboard) sits far enough right that zooming hard
+  // into the main card would otherwise drag it half off-screen — dim it
+  // out while the camera is pushed in, then bring it back before the
+  // rank-climb plays. Not needed when the camera isn't zooming (mobile).
+  const sideOpacity = useTransform(progress, (v) =>
+    cinematic ? lerpKeyframes(v, [0.28, 0.42, 0.6, 0.68], [1, 0.15, 0.15, 1]) : 1
+  );
+
+  const acceptGate = useGate(progress, 0.5, 0.05);
+  const acceptScale = useTransform(acceptGate, (g) => 1 - g * 0.12);
+  const inviteOpacity = useTransform(progress, (v) => lerpKeyframes(v, [0.52, 0.6], [1, 0]));
+  const raceOpacity = useTransform(progress, (v) => lerpKeyframes(v, [0.52, 0.6], [0, 1]));
+  const fillWidth = useTransform(progress, (v) => `${lerpKeyframes(v, [0.6, 0.8], [0, 62])}%`);
+  const lbAOpacity = useTransform(progress, (v) => lerpKeyframes(v, [0.68, 0.82], [1, 0]));
+  const lbBOpacity = useTransform(progress, (v) => lerpKeyframes(v, [0.68, 0.82], [0, 1]));
+
   return (
-    <div className={`gr-scene-shot ${frame}`}>
-      {chrome && (
-        <div className="gr-scene-shot-chrome">
-          <span />
-          <span />
-          <span />
+    <motion.div className="gr-cine-cam" style={{ scale: cam.scale, transformOrigin: cam.transformOrigin }}>
+      <div className="gr-cine-grid">
+        <div className="gr-cine-panel main">
+          <span className="gr-pillar-tag compete gr-cine-tag">compete</span>
+          <div className="gr-cine-stack">
+            <motion.div className="gr-cine-card" style={{ opacity: inviteOpacity }}>
+              <div className="gr-cine-card-head">
+                <div className="gr-avatar" style={{ background: "var(--surface-elevated)", color: "var(--text)" }}>
+                  AM
+                </div>
+                <div>
+                  <div className="gr-cine-card-title">Alex M. wants to compete</div>
+                  <div className="gr-cine-card-sub">Chemistry 101 · Final grade</div>
+                </div>
+              </div>
+              <div className="gr-cine-actions">
+                <motion.button className="gr-btn primary" style={{ scale: acceptScale }}>
+                  Accept
+                </motion.button>
+                <button className="gr-btn ghost">Decline</button>
+              </div>
+            </motion.div>
+
+            <motion.div className="gr-cine-card" style={{ opacity: raceOpacity }}>
+              <div className="gr-rivalry-pair" style={{ margin: "4px 0 18px" }}>
+                <div className="gr-rivalry-side">
+                  <div className="who">You</div>
+                  <div className="gpa" style={{ color: "var(--cyan-text)" }}>
+                    3.78
+                  </div>
+                </div>
+                <ArrowUpRight style={{ color: "var(--mint-text)", flex: "none" }} />
+                <div className="gr-rivalry-side">
+                  <div className="who">Alex M.</div>
+                  <div className="gpa">3.66</div>
+                </div>
+              </div>
+              <div className="gr-momentum-track">
+                <motion.div className="gr-momentum-fill" style={{ width: fillWidth }} />
+              </div>
+              <p className="gr-cine-note">You're 0.12 ahead in Chemistry 101 — momentum building.</p>
+            </motion.div>
+          </div>
         </div>
-      )}
-      <motion.img
-        src={src}
-        alt={alt}
-        className={`gr-scene-shot-img ${frame === "screen" ? "cover" : "contain"}`}
-        style={{ scale, transformOrigin: origin }}
-      />
-    </div>
+
+        <motion.div className="gr-cine-panel side" style={{ opacity: sideOpacity }}>
+          <div className="gr-cine-card-title" style={{ marginBottom: 16 }}>
+            Class leaderboard
+          </div>
+          <div className="gr-cine-stack">
+            <motion.div className="gr-cine-lb" style={{ opacity: lbAOpacity }}>
+              <div className="gr-cine-lb-row">
+                <span className="rank">#1</span>
+                <span className="name">Alex M.</span>
+                <span className="val">3.66</span>
+              </div>
+              <div className="gr-cine-lb-row you">
+                <span className="rank">#2</span>
+                <span className="name">You</span>
+                <span className="val">3.78</span>
+              </div>
+              <div className="gr-cine-lb-row">
+                <span className="rank">#3</span>
+                <span className="name">Priya K.</span>
+                <span className="val">3.51</span>
+              </div>
+            </motion.div>
+            <motion.div className="gr-cine-lb" style={{ opacity: lbBOpacity }}>
+              <div className="gr-cine-lb-row you">
+                <span className="rank">#1</span>
+                <span className="name">You</span>
+                <span className="val">3.78</span>
+              </div>
+              <div className="gr-cine-lb-row">
+                <span className="rank">#2</span>
+                <span className="name">Alex M.</span>
+                <span className="val">3.66</span>
+              </div>
+              <div className="gr-cine-lb-row">
+                <span className="rank">#3</span>
+                <span className="name">Priya K.</span>
+                <span className="val">3.51</span>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
-function ChallengeVisual({ progress }) {
+function ImproveScene({ progress, cinematic = true }) {
+  const cam = useCameraPath(
+    progress,
+    cinematic
+      ? [
+          { at: 0, scale: 1, x: 50, y: 50 },
+          { at: 0.22, scale: 1.04, x: 50, y: 50 },
+          { at: 0.46, scale: 1.5, x: 38, y: 52 },
+          { at: 0.7, scale: 1.32, x: 62, y: 34 },
+          { at: 1, scale: 1.18, x: 62, y: 36 },
+        ]
+      : FLAT_CAM
+  );
+  // The camera swings from the grade card (left) all the way to the GPA
+  // ring (right) — dim whichever panel isn't currently in frame instead
+  // of letting the rigid two-panel grid stretch/crop past the viewport.
+  // Not needed when the camera isn't zooming (mobile, stacked panels).
+  const mainOpacity = useTransform(progress, (v) =>
+    cinematic ? lerpKeyframes(v, [0, 0.28, 0.58, 0.72], [1, 1, 1, 0.15]) : 1
+  );
+  const sideOpacity = useTransform(progress, (v) =>
+    cinematic ? lerpKeyframes(v, [0, 0.28, 0.4, 0.6, 0.72], [1, 1, 0.15, 0.15, 1]) : 1
+  );
+
+  const newRowOpacity = useTransform(progress, (v) => lerpKeyframes(v, [0.42, 0.52], [0, 1]));
+  const newRowY = useTransform(progress, (v) => lerpKeyframes(v, [0.42, 0.52], [12, 0]));
+  const pctRaw = useTransform(progress, (v) => lerpKeyframes(v, [0.48, 0.64], [84, 87.5]));
+  const pctWidth = useTransform(pctRaw, (v) => `${v}%`);
+  const pctDisplay = useMotionValueState(useTransform(pctRaw, (v) => v.toFixed(1)));
+
+  const gpaRaw = useTransform(progress, (v) => lerpKeyframes(v, [0.72, 0.92], [3.78, 4.09]));
+  const gpaDisplay = useMotionValueState(useTransform(gpaRaw, (v) => v.toFixed(2)));
+  const ringOffset = useTransform(gpaRaw, (v) => 251 - (v / 4.3) * 251);
+  const xpWidth = useTransform(progress, (v) => `${lerpKeyframes(v, [0.72, 0.92], [40, 68])}%`);
+
   return (
-    <div className="gr-scene gr-scene-compete">
-      <Beat progress={progress} index={0}>
-        <ZoomShot
-          progress={progress}
-          index={0}
-          src="/story/compete-invite.png"
-          origin="50% 50%"
-          from={1}
-          to={1.12}
-          frame="card"
-          alt="Grade Arena challenge invite from Alex M."
-        />
-      </Beat>
-      <Beat progress={progress} index={1}>
-        <ZoomShot
-          progress={progress}
-          index={1}
-          src="/story/compete-invite.png"
-          origin="83% 68%"
-          from={1.2}
-          to={2.6}
-          frame="card"
-          alt="Accepting the challenge invite"
-        />
-      </Beat>
-      <Beat progress={progress} index={2}>
-        <ZoomShot
-          progress={progress}
-          index={2}
-          src="/story/compete-accepted.png"
-          origin="50% 55%"
-          from={1.5}
-          to={1.05}
-          frame="card"
-          alt="Head-to-head GPA race against Alex M."
-        />
-      </Beat>
-    </div>
+    <motion.div className="gr-cine-cam" style={{ scale: cam.scale, transformOrigin: cam.transformOrigin }}>
+      <div className="gr-cine-grid">
+        <motion.div className="gr-cine-panel main" style={{ opacity: mainOpacity }}>
+          <span className="gr-pillar-tag improve gr-cine-tag">improve</span>
+          <div className="gr-cine-card">
+            <div className="gr-cine-card-head-row">
+              <div className="gr-cine-card-title">Chemistry 101</div>
+              <div className="gr-cine-pct">{pctDisplay}%</div>
+            </div>
+            <div className="gr-pct-track" style={{ marginBottom: 16 }}>
+              <motion.div className="gr-pct-fill" style={{ width: pctWidth, background: "var(--cyan)" }} />
+            </div>
+            <div className="gr-cine-row">
+              <span>Midterm 1</span>
+              <span>84/100</span>
+            </div>
+            <motion.div className="gr-cine-row" style={{ opacity: newRowOpacity, y: newRowY }}>
+              <span>Midterm 2</span>
+              <span>91/100</span>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        <motion.div className="gr-cine-panel side center" style={{ opacity: sideOpacity }}>
+          <div className="gr-cine-ring">
+            <svg width="150" height="150" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" strokeWidth="8" />
+              <motion.circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="var(--cyan)"
+                strokeWidth="8"
+                strokeDasharray="251.2"
+                strokeLinecap="round"
+                transform="rotate(-90 50 50)"
+                style={{ strokeDashoffset: ringOffset }}
+              />
+            </svg>
+            <div className="gr-cine-ring-label">
+              <div className="gr-cine-gpa-value">{gpaDisplay}</div>
+              <div className="gr-cine-gpa-sub">LIVE GPA</div>
+            </div>
+          </div>
+          <div className="gr-cine-xp">
+            <div className="gr-xp-track">
+              <motion.div className="gr-xp-fill" style={{ width: xpWidth }} />
+            </div>
+            <div className="gr-xp-caption">
+              <span>Lv. 4</span>
+              <span>Lv. 5</span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
 
-function AverageVisual({ progress }) {
-  return (
-    <div className="gr-scene gr-scene-improve">
-      <Beat progress={progress} index={0}>
-        <ZoomShot
-          progress={progress}
-          index={0}
-          src="/story/improve-before.png"
-          origin="52% 78%"
-          from={1.1}
-          to={1.7}
-          frame="screen"
-          chrome
-          alt="Logging a grade for Chemistry 101 in Grade Arena"
-        />
-      </Beat>
-      <Beat progress={progress} index={1}>
-        <ZoomShot
-          progress={progress}
-          index={1}
-          src="/story/improve-after.png"
-          origin="50% 61%"
-          from={1.6}
-          to={2.3}
-          frame="screen"
-          chrome
-          alt="New grade landing and the class average updating"
-        />
-      </Beat>
-      <Beat progress={progress} index={2}>
-        <ZoomShot
-          progress={progress}
-          index={2}
-          src="/story/improve-dashboard.png"
-          origin="26% 14%"
-          from={1.9}
-          to={1.15}
-          frame="screen"
-          chrome
-          alt="Live GPA climbing on the Grade Arena dashboard"
-        />
-      </Beat>
-    </div>
+function CelebrateScene({ progress, cinematic = true }) {
+  const cam = useCameraPath(
+    progress,
+    cinematic
+      ? [
+          { at: 0, scale: 1, x: 50, y: 50 },
+          { at: 0.22, scale: 1.04, x: 50, y: 50 },
+          { at: 0.46, scale: 1.7, x: 60, y: 38 },
+          { at: 0.7, scale: 1.4, x: 52, y: 46 },
+          { at: 1, scale: 1.22, x: 55, y: 50 },
+        ]
+      : FLAT_CAM
   );
-}
 
-function FeedVisual({ progress }) {
+  const shareGate = useGate(progress, 0.5, 0.05);
+  const shareScale = useTransform(shareGate, (g) => 1 - g * 0.12);
+  const newPostOpacity = useTransform(progress, (v) => lerpKeyframes(v, [0.54, 0.66], [0, 1]));
+  const newPostY = useTransform(progress, (v) => lerpKeyframes(v, [0.54, 0.66], [-18, 0]));
+  const fire = useMotionValueState(useTransform(progress, (v) => Math.round(lerpKeyframes(v, [0.74, 0.92], [0, 8]))));
+  const clap = useMotionValueState(useTransform(progress, (v) => Math.round(lerpKeyframes(v, [0.78, 0.95], [0, 12]))));
+
   return (
-    <div className="gr-scene gr-scene-celebrate">
-      <Beat progress={progress} index={0}>
-        <ZoomShot
-          progress={progress}
-          index={0}
-          src="/story/celebrate-composing.png"
-          origin="50% 50%"
-          from={1}
-          to={1.12}
-          frame="card"
-          alt="Ready to share a Grade Arena win"
-        />
-      </Beat>
-      <Beat progress={progress} index={1}>
-        <ZoomShot
-          progress={progress}
-          index={1}
-          src="/story/celebrate-composing.png"
-          origin="80% 40%"
-          from={1.2}
-          to={2.5}
-          frame="card"
-          alt="Posting the win to the feed"
-        />
-      </Beat>
-      <Beat progress={progress} index={2}>
-        <ZoomShot
-          progress={progress}
-          index={2}
-          src="/story/celebrate-final.png"
-          origin="83% 60%"
-          from={1.6}
-          to={1.05}
-          frame="card"
-          alt="Friends reacting to the win in the feed"
-        />
-      </Beat>
-    </div>
+    <motion.div className="gr-cine-cam" style={{ scale: cam.scale, transformOrigin: cam.transformOrigin }}>
+      <div className="gr-cine-grid single">
+        <div className="gr-cine-panel main wide">
+          <span className="gr-pillar-tag celebrate gr-cine-tag">celebrate</span>
+
+          <div className="gr-cine-card gr-cine-share-row">
+            <span className="gr-cine-share-label">
+              <Star size={20} style={{ color: "var(--gold-text)", flex: "none" }} />
+              Reached Honor Roll — 3.90 GPA
+            </span>
+            <motion.button className="gr-btn primary" style={{ scale: shareScale }}>
+              Share to feed
+            </motion.button>
+          </div>
+
+          <motion.div className="gr-feed-item gr-cine-feed-item" style={{ opacity: newPostOpacity, y: newPostY }}>
+            <Star size={22} className="gr-feed-icon" />
+            <div className="gr-feed-body">
+              <div className="gr-feed-title">Reached Honor Roll — 3.90 GPA</div>
+              <div className="gr-feed-sub">+100 XP</div>
+            </div>
+            <div className="gr-feed-reactions">
+              <span>
+                <Flame size={13} /> {fire}
+              </span>
+              <span>
+                <ThumbsUp size={13} /> {clap}
+              </span>
+            </div>
+          </motion.div>
+
+          <div className="gr-feed-item gr-cine-feed-item muted">
+            <Trophy size={22} className="gr-feed-icon" />
+            <div className="gr-feed-body">
+              <div className="gr-feed-title">Won the Chemistry 101 Rivalry</div>
+              <div className="gr-feed-sub">+50 XP</div>
+            </div>
+            <div className="gr-feed-reactions">
+              <span>
+                <Flame size={13} /> 8
+              </span>
+              <span>
+                <ThumbsUp size={13} /> 12
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -220,27 +354,27 @@ const PHASES = [
     word: "COMPETE",
     color: "violet",
     copy: "Accept the challenge. Race for the grade.",
-    Visual: ChallengeVisual,
+    Scene: CompeteScene,
   },
   {
     key: "improve",
     word: "IMPROVE",
     color: "cyan",
     copy: "Post a grade. Watch your average climb.",
-    Visual: AverageVisual,
+    Scene: ImproveScene,
   },
   {
     key: "celebrate",
     word: "CELEBRATE",
     color: "gold",
     copy: "Share the win. Let your friends celebrate with you.",
-    Visual: FeedVisual,
+    Scene: CelebrateScene,
   },
 ];
 
 const B1 = 1 / 3;
 const B2 = 2 / 3;
-const FADE = 0.07;
+const FADE = 0.06;
 const PHASE_RANGES = [
   [0, B1],
   [B1, B2],
@@ -248,7 +382,7 @@ const PHASE_RANGES = [
 ];
 
 function PhaseLayer({ phase, index, scrollYProgress }) {
-  let inputRange, opacityKf, scaleKf, yKf;
+  let inputRange, opacityKf, scaleKf, blurKf;
   if (index === 0) {
     // No entrance ramp here (unlike the other two phases): this is the
     // first thing the pinned stage shows, arriving right as the hero
@@ -257,23 +391,24 @@ function PhaseLayer({ phase, index, scrollYProgress }) {
     // otherwise there's a blank beat between the two.
     inputRange = [0, B1 - FADE, B1];
     opacityKf = [1, 1, 0];
-    scaleKf = [1, 1, 0.95];
-    yKf = [0, 0, -22];
+    scaleKf = [1, 1, 0.96];
+    blurKf = [0, 0, 6];
   } else if (index === 1) {
     inputRange = [B1 - FADE, B1, B2 - FADE, B2];
     opacityKf = [0, 1, 1, 0];
-    scaleKf = [0.95, 1, 1, 0.95];
-    yKf = [22, 0, 0, -22];
+    scaleKf = [1.04, 1, 1, 0.96];
+    blurKf = [6, 0, 0, 6];
   } else {
     inputRange = [B2 - FADE, B2, 1];
     opacityKf = [0, 1, 1];
-    scaleKf = [0.95, 1, 1];
-    yKf = [22, 0, 0];
+    scaleKf = [1.04, 1, 1];
+    blurKf = [6, 0, 0];
   }
 
   const opacity = useTransform(scrollYProgress, (v) => lerpKeyframes(v, inputRange, opacityKf));
   const scale = useTransform(scrollYProgress, (v) => lerpKeyframes(v, inputRange, scaleKf));
-  const y = useTransform(scrollYProgress, (v) => lerpKeyframes(v, inputRange, yKf));
+  const blurPx = useTransform(scrollYProgress, (v) => lerpKeyframes(v, inputRange, blurKf));
+  const filter = useTransform(blurPx, (b) => `blur(${b}px)`);
 
   const [rangeStart, rangeEnd] = PHASE_RANGES[index];
   const localProgress = useTransform(scrollYProgress, (v) => {
@@ -281,12 +416,11 @@ function PhaseLayer({ phase, index, scrollYProgress }) {
     return Math.max(0, Math.min(1, t));
   });
 
-  const Visual = phase.Visual;
+  const Scene = phase.Scene;
   return (
-    <motion.div className={`gr-story-phase ${phase.color}`} style={{ opacity, scale, y }}>
-      <h2 className="gr-story-word">{phase.word}</h2>
-      <p className="gr-story-phase-copy">{phase.copy}</p>
-      <Visual progress={localProgress} />
+    <motion.div className="gr-story-phase" style={{ opacity, scale, filter }}>
+      <SceneTitle progress={localProgress} word={phase.word} copy={phase.copy} color={phase.color} />
+      <Scene progress={localProgress} />
     </motion.div>
   );
 }
@@ -340,11 +474,12 @@ function PinnedStory() {
   );
 }
 
-function AutoPlayVisual({ Visual }) {
+function AutoPlayScene({ phase }) {
   const progress = useMotionValue(0);
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const inView = useInView(ref, { once: true, amount: 0.4 });
   const reduceMotion = useReducedMotion();
+  const Scene = phase.Scene;
 
   useEffect(() => {
     if (!inView) return;
@@ -352,13 +487,14 @@ function AutoPlayVisual({ Visual }) {
       progress.set(1);
       return;
     }
-    const controls = animate(progress, 1, { duration: 2.8, ease: "easeInOut", delay: 0.2 });
+    const controls = animate(progress, 1, { duration: 3.2, ease: "easeInOut", delay: 0.2 });
     return () => controls.stop();
   }, [inView, reduceMotion, progress]);
 
   return (
-    <div ref={ref}>
-      <Visual progress={progress} />
+    <div ref={ref} className={`gr-story-phase-static ${phase.color}`}>
+      <SceneTitle progress={progress} word={phase.word} copy={phase.copy} color={phase.color} />
+      <Scene progress={progress} cinematic={false} />
     </div>
   );
 }
@@ -367,18 +503,7 @@ function SequentialStory() {
   return (
     <div className="gr-sequential-story">
       {PHASES.map((p) => (
-        <motion.div
-          key={p.key}
-          className={`gr-story-phase-static ${p.color}`}
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <h2 className="gr-story-word">{p.word}</h2>
-          <p className="gr-story-phase-copy">{p.copy}</p>
-          <AutoPlayVisual Visual={p.Visual} />
-        </motion.div>
+        <AutoPlayScene key={p.key} phase={p} />
       ))}
     </div>
   );

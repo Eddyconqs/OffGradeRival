@@ -71,23 +71,25 @@ export default function Landing({ onGetStarted, onLogin }) {
           style={reduceMotion ? undefined : heroMotion}
         >
           <div className="gr-landing-hero-glow" aria-hidden="true" />
-          <p className="gr-landing-tagline">
-            <span className="compete">Compete.</span> <span className="improve">Improve.</span>{" "}
-            <span className="celebrate">Celebrate.</span>
-          </p>
-          <h1 className="gr-landing-headline">
-            GRADE<span className="accent"> ARENA</span>
-          </h1>
-          <p className="gr-landing-sub">
-            Turn your grades into goals, challenges, rivals, and achievements. Compete with your
-            friends, track your progress, and celebrate every win.
-          </p>
-          <div className="gr-landing-cta-row">
-            <button className="gr-landing-cta" onClick={onGetStarted}>
-              Enter Grade Arena
-            </button>
+          <div className="gr-stagger">
+            <p className="gr-landing-tagline">
+              <span className="compete">Compete.</span> <span className="improve">Improve.</span>{" "}
+              <span className="celebrate">Celebrate.</span>
+            </p>
+            <h1 className="gr-landing-headline">
+              GRADE<span className="accent"> ARENA</span>
+            </h1>
+            <p className="gr-landing-sub">
+              Turn your grades into goals, challenges, rivals, and achievements. Compete with your
+              friends, track your progress, and celebrate every win.
+            </p>
+            <div className="gr-landing-cta-row">
+              <button className="gr-landing-cta" onClick={onGetStarted}>
+                Enter Grade Arena
+              </button>
+            </div>
+            <p className="gr-landing-cta-note">Just your name and a password — free, no email required.</p>
           </div>
-          <p className="gr-landing-cta-note">Just your name and a password — free, no email required.</p>
           <div className="gr-landing-scrollcue" aria-hidden="true">
             <span />
           </div>

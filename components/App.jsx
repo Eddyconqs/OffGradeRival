@@ -12,6 +12,7 @@ import Dashboard from "./Dashboard";
 import Classes from "./Classes";
 import Social from "./Social";
 import StudyHub from "./StudyHub";
+import Feed from "./Feed";
 
 function Toast() {
   const { toast } = useStore();
@@ -86,6 +87,7 @@ function Shell() {
           {tab === "classes" && <Classes />}
           {tab === "social" && <Social />}
           {tab === "study" && <StudyHub />}
+          {tab === "feed" && <Feed />}
         </div>
       </div>
 
