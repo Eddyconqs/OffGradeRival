@@ -1,8 +1,50 @@
 "use client";
 
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { lerpKeyframes } from "../lib/scrollMotion";
 import ScrollStory from "./ScrollStory";
 
+/* Hero and Unify aren't pinned (no added scroll height, no scroll-jacking)
+   — they ride their own natural scroll distance. Hero reads its progress
+   from "fully in view" to "scrolled past" and uses that to fade/scale/blur
+   itself away, like a title card being pulled off screen. Unify reads its
+   progress from "just entering" to "reaching center" and runs the same
+   transform in reverse, like the next scene racking into focus. Together
+   with the pinned Compete/Improve/Celebrate sequence in between, the whole
+   page reads as one continuous scroll-driven scene change rather than a
+   stack of sections. */
+
+function useSceneExit(ref) {
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const range = [0, 0.65, 1];
+  const opacity = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [1, 0.4, 0]));
+  const scale = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [1, 0.96, 0.9]));
+  const y = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [0, -20, -70]));
+  const blur = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [0, 2, 7]));
+  const filter = useTransform(blur, (b) => `blur(${b}px)`);
+  return { opacity, scale, y, filter };
+}
+
+function useSceneEnter(ref) {
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
+  const range = [0, 0.55, 1];
+  const opacity = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [0, 0.6, 1]));
+  const scale = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [0.92, 0.97, 1]));
+  const y = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [50, 16, 0]));
+  const blur = useTransform(scrollYProgress, (v) => lerpKeyframes(v, range, [6, 2, 0]));
+  const filter = useTransform(blur, (b) => `blur(${b}px)`);
+  return { opacity, scale, y, filter };
+}
+
 export default function Landing({ onGetStarted, onLogin }) {
+  const heroRef = useRef(null);
+  const unifyRef = useRef(null);
+  const reduceMotion = useReducedMotion();
+
+  const heroMotion = useSceneExit(heroRef);
+  const unifyMotion = useSceneEnter(unifyRef);
+
   return (
     <div className="gr-landing">
       <header className="gr-landing-header-fixed">
@@ -23,7 +65,12 @@ export default function Landing({ onGetStarted, onLogin }) {
       </header>
 
       <div className="gr-landing-shell">
-        <section className="gr-landing-hero">
+        <motion.section
+          ref={heroRef}
+          className="gr-landing-hero"
+          style={reduceMotion ? undefined : heroMotion}
+        >
+          <div className="gr-landing-hero-glow" aria-hidden="true" />
           <p className="gr-landing-tagline">
             <span className="compete">Compete.</span> <span className="improve">Improve.</span>{" "}
             <span className="celebrate">Celebrate.</span>
@@ -44,13 +91,18 @@ export default function Landing({ onGetStarted, onLogin }) {
           <div className="gr-landing-scrollcue" aria-hidden="true">
             <span />
           </div>
-        </section>
+        </motion.section>
       </div>
 
       <ScrollStory />
 
       <div className="gr-landing-shell">
-        <section className="gr-landing-unify">
+        <motion.section
+          ref={unifyRef}
+          className="gr-landing-unify"
+          style={reduceMotion ? undefined : unifyMotion}
+        >
+          <div className="gr-landing-unify-glow" aria-hidden="true" />
           <div className="gr-landing-unify-words">
             <span className="compete">Compete</span>
             <span className="improve">Improve</span>
@@ -61,7 +113,7 @@ export default function Landing({ onGetStarted, onLogin }) {
           <button className="gr-landing-cta" onClick={onGetStarted}>
             Enter Grade Arena
           </button>
-        </section>
+        </motion.section>
       </div>
 
       <footer className="gr-landing-footer">

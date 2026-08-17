@@ -1,7 +1,16 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useReducedMotion,
+  useMotionValue,
+  useInView,
+  animate,
+} from "framer-motion";
+import { lerpKeyframes, useSegmentMotion } from "../lib/scrollMotion";
 
 /* ============================================================
    The Compete -> Improve -> Celebrate scroll story. Desktop (and
@@ -12,140 +21,244 @@ import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion
    useScroll + useTransform — the animation IS the scroll, not
    triggered by it.
 
-   Mobile and reduced-motion both get a simpler fallback: the
-   same three visuals, same copy, just stacked normally and
-   revealed once each scrolls into view (no pinning, no scrubbing)
-   — true scroll-jacking is more likely to feel broken than
-   premium on touch devices, and must be skippable for anyone who
-   asked for less motion.
+   Each phase is a short sequence of REAL screenshots of the real
+   Grade Arena app (Dashboard, Classes, and two small real components
+   built for the parts of the story the app doesn't have live yet —
+   ChallengeInviteCard and FeedPreview, styled with the app's actual
+   design system, not illustrated). Scrolling zooms the camera into a
+   specific real detail on each screenshot — the Accept button, the
+   grade that just landed, the reaction counts — then the next beat
+   swaps in the next real screenshot. Scrolling forward plays the
+   sequence forward; scrolling back reverses it — true scrubbing.
+
+   Mobile and reduced-motion both get a simpler fallback: the same
+   three scenes, stacked normally, each auto-playing its own zoom
+   sequence once when it scrolls into view (no pinning, no
+   scroll-jacking) — true scroll-jacking is more likely to feel
+   broken than premium on touch devices, and must be skippable for
+   anyone who asked for less motion, in which case the clip resolves
+   straight to its final frame instead of animating.
    ============================================================ */
+
+const SEG = [0, 1 / 3, 2 / 3, 1];
+
+function Beat({ progress, index, children }) {
+  const { opacity, y } = useSegmentMotion(progress, SEG[index], SEG[index + 1], {
+    fadeIn: index > 0,
+    fadeOut: index < 2,
+  });
+  return (
+    <motion.div className="gr-scene-beat" style={{ opacity, y }}>
+      {children}
+    </motion.div>
+  );
+}
+
+// One real screenshot, zoomed toward `origin` (a CSS transform-origin
+// percentage pair pointing at the specific real detail this beat is
+// about) as the beat plays. `frame` picks how it sits in its window:
+// "screen" full-bleed-crops a real full-page app screenshot; "card" is
+// for the small standalone component screenshots, shown whole.
+function ZoomShot({ progress, index, src, origin, from, to, frame, chrome, alt }) {
+  const scale = useTransform(progress, (v) =>
+    lerpKeyframes(v, [SEG[index], SEG[index + 1]], [from, to])
+  );
+  return (
+    <div className={`gr-scene-shot ${frame}`}>
+      {chrome && (
+        <div className="gr-scene-shot-chrome">
+          <span />
+          <span />
+          <span />
+        </div>
+      )}
+      <motion.img
+        src={src}
+        alt={alt}
+        className={`gr-scene-shot-img ${frame === "screen" ? "cover" : "contain"}`}
+        style={{ scale, transformOrigin: origin }}
+      />
+    </div>
+  );
+}
+
+function ChallengeVisual({ progress }) {
+  return (
+    <div className="gr-scene gr-scene-compete">
+      <Beat progress={progress} index={0}>
+        <ZoomShot
+          progress={progress}
+          index={0}
+          src="/story/compete-invite.png"
+          origin="50% 50%"
+          from={1}
+          to={1.12}
+          frame="card"
+          alt="Grade Arena challenge invite from Alex M."
+        />
+      </Beat>
+      <Beat progress={progress} index={1}>
+        <ZoomShot
+          progress={progress}
+          index={1}
+          src="/story/compete-invite.png"
+          origin="83% 68%"
+          from={1.2}
+          to={2.6}
+          frame="card"
+          alt="Accepting the challenge invite"
+        />
+      </Beat>
+      <Beat progress={progress} index={2}>
+        <ZoomShot
+          progress={progress}
+          index={2}
+          src="/story/compete-accepted.png"
+          origin="50% 55%"
+          from={1.5}
+          to={1.05}
+          frame="card"
+          alt="Head-to-head GPA race against Alex M."
+        />
+      </Beat>
+    </div>
+  );
+}
+
+function AverageVisual({ progress }) {
+  return (
+    <div className="gr-scene gr-scene-improve">
+      <Beat progress={progress} index={0}>
+        <ZoomShot
+          progress={progress}
+          index={0}
+          src="/story/improve-before.png"
+          origin="52% 78%"
+          from={1.1}
+          to={1.7}
+          frame="screen"
+          chrome
+          alt="Logging a grade for Chemistry 101 in Grade Arena"
+        />
+      </Beat>
+      <Beat progress={progress} index={1}>
+        <ZoomShot
+          progress={progress}
+          index={1}
+          src="/story/improve-after.png"
+          origin="50% 61%"
+          from={1.6}
+          to={2.3}
+          frame="screen"
+          chrome
+          alt="New grade landing and the class average updating"
+        />
+      </Beat>
+      <Beat progress={progress} index={2}>
+        <ZoomShot
+          progress={progress}
+          index={2}
+          src="/story/improve-dashboard.png"
+          origin="26% 14%"
+          from={1.9}
+          to={1.15}
+          frame="screen"
+          chrome
+          alt="Live GPA climbing on the Grade Arena dashboard"
+        />
+      </Beat>
+    </div>
+  );
+}
+
+function FeedVisual({ progress }) {
+  return (
+    <div className="gr-scene gr-scene-celebrate">
+      <Beat progress={progress} index={0}>
+        <ZoomShot
+          progress={progress}
+          index={0}
+          src="/story/celebrate-composing.png"
+          origin="50% 50%"
+          from={1}
+          to={1.12}
+          frame="card"
+          alt="Ready to share a Grade Arena win"
+        />
+      </Beat>
+      <Beat progress={progress} index={1}>
+        <ZoomShot
+          progress={progress}
+          index={1}
+          src="/story/celebrate-composing.png"
+          origin="80% 40%"
+          from={1.2}
+          to={2.5}
+          frame="card"
+          alt="Posting the win to the feed"
+        />
+      </Beat>
+      <Beat progress={progress} index={2}>
+        <ZoomShot
+          progress={progress}
+          index={2}
+          src="/story/celebrate-final.png"
+          origin="83% 60%"
+          from={1.6}
+          to={1.05}
+          frame="card"
+          alt="Friends reacting to the win in the feed"
+        />
+      </Beat>
+    </div>
+  );
+}
 
 const PHASES = [
   {
     key: "compete",
     word: "COMPETE",
     color: "violet",
-    copy: "Challenge a friend. Race for the grade.",
-    Visual: RivalryVisual,
+    copy: "Accept the challenge. Race for the grade.",
+    Visual: ChallengeVisual,
   },
   {
     key: "improve",
     word: "IMPROVE",
     color: "cyan",
-    copy: "Watch your average climb — see exactly what it takes.",
-    Visual: GraphVisual,
+    copy: "Post a grade. Watch your average climb.",
+    Visual: AverageVisual,
   },
   {
     key: "celebrate",
     word: "CELEBRATE",
     color: "gold",
-    copy: "Every win, recognized. Every milestone, celebrated.",
-    Visual: CelebrateVisual,
+    copy: "Share the win. Let your friends celebrate with you.",
+    Visual: FeedVisual,
   },
 ];
-
-function RivalryVisual() {
-  return (
-    <div className="gr-story-mock gr-rivalry-mock">
-      <div className="gr-rivalry-row">
-        <div className="gr-rivalry-side">
-          <div className="gr-rivalry-avatar you">YOU</div>
-          <div className="gr-rivalry-name">You</div>
-        </div>
-        <div className="gr-rivalry-vs">VS</div>
-        <div className="gr-rivalry-side">
-          <div className="gr-rivalry-avatar rival">AM</div>
-          <div className="gr-rivalry-name">Alex M.</div>
-        </div>
-      </div>
-      <div className="gr-rivalry-track">
-        <div className="gr-rivalry-fill" />
-      </div>
-      <p className="gr-story-mock-caption">
-        You're <b>0.12</b> ahead in Chemistry 101 — momentum building.
-      </p>
-    </div>
-  );
-}
-
-function GraphVisual() {
-  return (
-    <div className="gr-story-mock gr-graph-mock">
-      <svg viewBox="0 0 280 130" className="gr-graph-svg" preserveAspectRatio="none">
-        <line x1="0" y1="26" x2="280" y2="26" className="gr-graph-target" />
-        <polyline points="0,112 56,98 112,82 168,60 224,40 280,24" className="gr-graph-you" />
-        <polyline points="0,116 56,110 112,102 168,95 224,90 280,86" className="gr-graph-rival" />
-      </svg>
-      <div className="gr-graph-legend">
-        <span>
-          <i className="you" /> You
-        </span>
-        <span>
-          <i className="rival" /> Alex M.
-        </span>
-        <span>
-          <i className="target" /> Target: A
-        </span>
-      </div>
-      <p className="gr-story-mock-caption">
-        Average <b>88%+</b> on remaining work to reach A.
-      </p>
-    </div>
-  );
-}
-
-function CelebrateVisual() {
-  return (
-    <div className="gr-story-mock gr-celebrate-mock">
-      <div className="gr-celebrate-card">
-        <span className="gr-celebrate-icon">🏆</span>
-        <div className="gr-celebrate-body">
-          <div className="gr-celebrate-title">Won the Chemistry 101 Rivalry</div>
-          <div className="gr-celebrate-sub">+50 XP</div>
-        </div>
-        <div className="gr-celebrate-reactions">🔥 8 · 👏 12</div>
-      </div>
-      <div className="gr-celebrate-card">
-        <span className="gr-celebrate-icon">⭐</span>
-        <div className="gr-celebrate-body">
-          <div className="gr-celebrate-title">Reached Honor Roll — 3.90 GPA</div>
-          <div className="gr-celebrate-sub">+100 XP</div>
-        </div>
-        <div className="gr-celebrate-reactions">🎉 15 · 👏 6</div>
-      </div>
-    </div>
-  );
-}
 
 const B1 = 1 / 3;
 const B2 = 2 / 3;
 const FADE = 0.07;
-
-// Manual clamped piecewise-linear interpolation, used instead of
-// useTransform's array-keyframes overload — that overload produced
-// visibly wrong (stuck) output for one specific phase in testing here;
-// this function-based form sidesteps whatever that was.
-function lerpKeyframes(v, inputRange, outputRange) {
-  if (v <= inputRange[0]) return outputRange[0];
-  if (v >= inputRange[inputRange.length - 1]) return outputRange[outputRange.length - 1];
-  for (let i = 0; i < inputRange.length - 1; i++) {
-    const a = inputRange[i];
-    const b = inputRange[i + 1];
-    if (v >= a && v <= b) {
-      const t = b === a ? 0 : (v - a) / (b - a);
-      return outputRange[i] + (outputRange[i + 1] - outputRange[i]) * t;
-    }
-  }
-  return outputRange[outputRange.length - 1];
-}
+const PHASE_RANGES = [
+  [0, B1],
+  [B1, B2],
+  [B2, 1],
+];
 
 function PhaseLayer({ phase, index, scrollYProgress }) {
   let inputRange, opacityKf, scaleKf, yKf;
   if (index === 0) {
-    inputRange = [0, 0.04, B1 - FADE, B1];
-    opacityKf = [0, 1, 1, 0];
-    scaleKf = [0.94, 1, 1, 0.95];
-    yKf = [26, 0, 0, -22];
+    // No entrance ramp here (unlike the other two phases): this is the
+    // first thing the pinned stage shows, arriving right as the hero
+    // section's own scroll-linked exit finishes fading it out, so it
+    // needs to already be fully visible the instant the pin engages —
+    // otherwise there's a blank beat between the two.
+    inputRange = [0, B1 - FADE, B1];
+    opacityKf = [1, 1, 0];
+    scaleKf = [1, 1, 0.95];
+    yKf = [0, 0, -22];
   } else if (index === 1) {
     inputRange = [B1 - FADE, B1, B2 - FADE, B2];
     opacityKf = [0, 1, 1, 0];
@@ -162,23 +275,24 @@ function PhaseLayer({ phase, index, scrollYProgress }) {
   const scale = useTransform(scrollYProgress, (v) => lerpKeyframes(v, inputRange, scaleKf));
   const y = useTransform(scrollYProgress, (v) => lerpKeyframes(v, inputRange, yKf));
 
+  const [rangeStart, rangeEnd] = PHASE_RANGES[index];
+  const localProgress = useTransform(scrollYProgress, (v) => {
+    const t = (v - rangeStart) / (rangeEnd - rangeStart);
+    return Math.max(0, Math.min(1, t));
+  });
+
   const Visual = phase.Visual;
   return (
     <motion.div className={`gr-story-phase ${phase.color}`} style={{ opacity, scale, y }}>
       <h2 className="gr-story-word">{phase.word}</h2>
       <p className="gr-story-phase-copy">{phase.copy}</p>
-      <Visual />
+      <Visual progress={localProgress} />
     </motion.div>
   );
 }
 
 function ProgressDot({ index, scrollYProgress, color }) {
-  const ranges = [
-    [0, B1],
-    [B1, B2],
-    [B2, 1],
-  ];
-  const [start, end] = ranges[index];
+  const [start, end] = PHASE_RANGES[index];
   const mid = (start + end) / 2;
   const dotRange = [start, mid, end];
   const scale = useTransform(scrollYProgress, (v) => lerpKeyframes(v, dotRange, [0.55, 1.3, 0.55]));
@@ -226,26 +340,46 @@ function PinnedStory() {
   );
 }
 
+function AutoPlayVisual({ Visual }) {
+  const progress = useMotionValue(0);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!inView) return;
+    if (reduceMotion) {
+      progress.set(1);
+      return;
+    }
+    const controls = animate(progress, 1, { duration: 2.8, ease: "easeInOut", delay: 0.2 });
+    return () => controls.stop();
+  }, [inView, reduceMotion, progress]);
+
+  return (
+    <div ref={ref}>
+      <Visual progress={progress} />
+    </div>
+  );
+}
+
 function SequentialStory() {
   return (
     <div className="gr-sequential-story">
-      {PHASES.map((p) => {
-        const Visual = p.Visual;
-        return (
-          <motion.div
-            key={p.key}
-            className={`gr-story-phase-static ${p.color}`}
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <h2 className="gr-story-word">{p.word}</h2>
-            <p className="gr-story-phase-copy">{p.copy}</p>
-            <Visual />
-          </motion.div>
-        );
-      })}
+      {PHASES.map((p) => (
+        <motion.div
+          key={p.key}
+          className={`gr-story-phase-static ${p.color}`}
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <h2 className="gr-story-word">{p.word}</h2>
+          <p className="gr-story-phase-copy">{p.copy}</p>
+          <AutoPlayVisual Visual={p.Visual} />
+        </motion.div>
+      ))}
     </div>
   );
 }
