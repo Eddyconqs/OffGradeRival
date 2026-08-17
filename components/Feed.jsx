@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Image as ImageIcon, X } from "lucide-react";
-import { useStore } from "../lib/store";
+import { useStore, REACTIONS } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import { searchGifs, trendingGifs, giphyConfigured } from "../lib/giphy";
 
@@ -158,7 +158,109 @@ function Composer({ onPost }) {
   );
 }
 
-function PostCard({ post, myId, onRemove }) {
+function ReactionBar({ post, myId, onToggle }) {
+  return (
+    <div className="gr-reaction-bar">
+      {REACTIONS.map((emoji) => {
+        const count = post.reactions.filter((r) => r.emoji === emoji).length;
+        const mine = post.reactions.some((r) => r.userId === myId && r.emoji === emoji);
+        return (
+          <button
+            key={emoji}
+            className={`gr-reaction-btn ${mine ? "active" : ""}`}
+            onClick={() => onToggle(post.id, emoji)}
+          >
+            {emoji}
+            {count > 0 && <span>{count}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function CommentComposer({ onSubmit }) {
+  const [text, setText] = useState("");
+  const [gif, setGif] = useState(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!text.trim() && !gif) return;
+    setBusy(true);
+    await onSubmit(text.trim(), gif);
+    setText("");
+    setGif(null);
+    setBusy(false);
+  };
+
+  return (
+    <div className="gr-comment-composer">
+      <div className="gr-row" style={{ gap: 8 }}>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Write a comment…"
+          style={{ flex: 1 }}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+        />
+        <button className="gr-btn small ghost" onClick={() => setPickerOpen((v) => !v)} aria-label="Add GIF">
+          <ImageIcon size={14} />
+        </button>
+        <button className="gr-btn small primary" disabled={busy || (!text.trim() && !gif)} onClick={submit}>
+          Reply
+        </button>
+      </div>
+      {gif && !pickerOpen && (
+        <div className="gr-feed-gif-preview">
+          <img src={gif} alt="Selected GIF" />
+          <button className="gr-btn small ghost" onClick={() => setGif(null)}>
+            <X size={14} /> Remove
+          </button>
+        </div>
+      )}
+      {pickerOpen && (
+        <GifPicker
+          onPick={(url) => {
+            setGif(url);
+            setPickerOpen(false);
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function CommentRow({ comment, myId, onRemove }) {
+  return (
+    <div className="gr-comment-row">
+      <span className="gr-avatar" style={{ width: 24, height: 24, fontSize: 10, flex: "none" }}>
+        {initials(comment.authorName)}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="gr-comment-meta">
+          <b>{comment.authorName}</b> <span className="gr-post-time">{timeAgo(comment.at)}</span>
+        </div>
+        {comment.text && <div className="gr-comment-text">{comment.text}</div>}
+        {comment.gifDataUrl && (
+          <div className="gr-comment-gif">
+            <img src={comment.gifDataUrl} alt="" />
+          </div>
+        )}
+      </div>
+      {comment.authorId === myId && (
+        <button className="gr-btn small ghost" onClick={() => onRemove(comment.id)} aria-label="Delete comment">
+          ✕
+        </button>
+      )}
+    </div>
+  );
+}
+
+function PostCard({ post, myId, onRemove, onToggleReaction, onAddComment, onRemoveComment }) {
+  const [showComments, setShowComments] = useState(false);
+
   return (
     <div className="gr-post">
       <div className="gr-post-head">
@@ -181,12 +283,30 @@ function PostCard({ post, myId, onRemove }) {
           <img src={post.gifDataUrl} alt="" />
         </div>
       )}
+
+      <div className="gr-post-footer">
+        <ReactionBar post={post} myId={myId} onToggle={onToggleReaction} />
+        <button className="gr-btn small ghost" onClick={() => setShowComments((v) => !v)}>
+          {post.comments.length > 0
+            ? `${post.comments.length} comment${post.comments.length === 1 ? "" : "s"}`
+            : "Comment"}
+        </button>
+      </div>
+
+      {showComments && (
+        <div className="gr-comments">
+          {post.comments.map((c) => (
+            <CommentRow key={c.id} comment={c} myId={myId} onRemove={(commentId) => onRemoveComment(post.id, commentId)} />
+          ))}
+          <CommentComposer onSubmit={(text, gif) => onAddComment(post.id, text, gif)} />
+        </div>
+      )}
     </div>
   );
 }
 
 export default function Feed() {
-  const { posts, addPost, removePost, refreshPosts } = useStore();
+  const { posts, addPost, removePost, refreshPosts, toggleReaction, addComment, removeComment } = useStore();
   const { session } = useAuth();
   const myId = session?.user?.id;
 
@@ -214,7 +334,17 @@ export default function Feed() {
           Be the first to share something — or add some rivals from the Groups tab.
         </div>
       ) : (
-        posts.map((p) => <PostCard key={p.id} post={p} myId={myId} onRemove={removePost} />)
+        posts.map((p) => (
+          <PostCard
+            key={p.id}
+            post={p}
+            myId={myId}
+            onRemove={removePost}
+            onToggleReaction={toggleReaction}
+            onAddComment={addComment}
+            onRemoveComment={removeComment}
+          />
+        ))
       )}
     </div>
   );

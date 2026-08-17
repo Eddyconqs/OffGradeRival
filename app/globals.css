@@ -2905,6 +2905,95 @@ a:focus-visible {
   display: block;
 }
 
+.gr-post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.gr-reaction-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.gr-reaction-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gr-reaction-btn:hover {
+  background: var(--surface-elevated);
+}
+
+.gr-reaction-btn.active {
+  background: var(--surface-elevated);
+  border-color: var(--cyan);
+}
+
+.gr-reaction-btn span {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.gr-comments {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gr-comment-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.gr-comment-meta {
+  font-size: 12px;
+}
+
+.gr-comment-meta b {
+  font-weight: 600;
+}
+
+.gr-comment-text {
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  margin-top: 2px;
+}
+
+.gr-comment-gif {
+  margin-top: 6px;
+}
+
+.gr-comment-gif img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.gr-comment-composer .gr-feed-gif-preview img {
+  max-height: 160px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

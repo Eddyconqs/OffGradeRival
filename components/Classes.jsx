@@ -53,42 +53,50 @@ function AddAssignmentRow({ classId, categories, onAdd }) {
   const [name, setName] = useState("");
   const [score, setScore] = useState("");
   const [max, setMax] = useState("100");
+  const [shareToFeed, setShareToFeed] = useState(false);
 
   return (
-    <div className="gr-row" style={{ marginTop: 10 }}>
-      <div className="gr-field" style={{ minWidth: 130 }}>
-        <label>Category</label>
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+    <div style={{ marginTop: 10 }}>
+      <div className="gr-row">
+        <div className="gr-field" style={{ minWidth: 130 }}>
+          <label>Category</label>
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="gr-field" style={{ flex: 1, minWidth: 140 }}>
+          <label>Assignment</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Unit 4 Quiz" />
+        </div>
+        <div className="gr-field" style={{ width: 80 }}>
+          <label>Score</label>
+          <input type="number" value={score} onChange={(e) => setScore(e.target.value)} />
+        </div>
+        <div className="gr-field" style={{ width: 80 }}>
+          <label>Out of</label>
+          <input type="number" value={max} onChange={(e) => setMax(e.target.value)} />
+        </div>
+        <button
+          className="gr-btn small primary"
+          disabled={!name.trim() || score === "" || !max || !categoryId}
+          onClick={() => {
+            onAdd(classId, categoryId, name.trim(), score, max, shareToFeed);
+            setName("");
+            setScore("");
+            setShareToFeed(false);
+          }}
+        >
+          Add
+        </button>
       </div>
-      <div className="gr-field" style={{ flex: 1, minWidth: 140 }}>
-        <label>Assignment</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Unit 4 Quiz" />
-      </div>
-      <div className="gr-field" style={{ width: 80 }}>
-        <label>Score</label>
-        <input type="number" value={score} onChange={(e) => setScore(e.target.value)} />
-      </div>
-      <div className="gr-field" style={{ width: 80 }}>
-        <label>Out of</label>
-        <input type="number" value={max} onChange={(e) => setMax(e.target.value)} />
-      </div>
-      <button
-        className="gr-btn small primary"
-        disabled={!name.trim() || score === "" || !max || !categoryId}
-        onClick={() => {
-          onAdd(classId, categoryId, name.trim(), score, max);
-          setName("");
-          setScore("");
-        }}
-      >
-        Add
-      </button>
+      <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12.5, color: "var(--text-muted)", cursor: "pointer" }}>
+        <input type="checkbox" checked={shareToFeed} onChange={(e) => setShareToFeed(e.target.checked)} />
+        Share this grade to the Feed
+      </label>
     </div>
   );
 }
