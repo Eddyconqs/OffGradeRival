@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { createClient } from "@supabase/supabase-js";
 
 // Server-only — GEMINI_API_KEY is never exposed to the client, unlike the
 // Giphy key. Gemini's free tier (Flash models) needs no billing to work,
@@ -6,12 +7,28 @@ import { GoogleGenAI } from "@google/genai";
 const apiKey = process.env.GEMINI_API_KEY;
 const client = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
 const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp"]);
 
 function parseDataUrl(dataUrl) {
   const match = /^data:([^;]+);base64,(.+)$/s.exec(dataUrl || "");
   if (!match) return null;
   return { mediaType: match[1], base64: match[2] };
+}
+
+// This route calls a paid/quota'd third-party API using our own server-side
+// key — without this check anyone on the internet, logged in or not, could
+// hit it directly and burn that quota. Verifies the caller's Supabase JWT
+// rather than trusting whatever the client claims.
+async function requireUser(request) {
+  const token = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token || !supabaseUrl || !supabaseAnonKey) return null;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return data.user;
 }
 
 export async function POST(request) {
@@ -23,6 +40,11 @@ export async function POST(request) {
       },
       { status: 501 }
     );
+  }
+
+  const user = await requireUser(request);
+  if (!user) {
+    return Response.json({ error: "You must be signed in to generate notes." }, { status: 401 });
   }
 
   let body;

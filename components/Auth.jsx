@@ -133,7 +133,7 @@ export default function Auth({ onBack }) {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
+            placeholder="At least 8 characters"
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             onKeyDown={(e) => e.key === "Enter" && !busy && submit()}
           />
