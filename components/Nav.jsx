@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -15,6 +17,7 @@ import {
 } from "lucide-react";
 import { useStore } from "../lib/store";
 import { signOut } from "../lib/auth";
+import ProfileCard from "./ProfileCard";
 
 export const TABS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -27,6 +30,7 @@ export const TABS = [
 
 export function Sidebar({ active, onChange }) {
   const { theme, toggleTheme, profile, levelInfo } = useStore();
+  const [showCard, setShowCard] = useState(false);
 
   return (
     <aside className="gr-sidebar">
@@ -60,7 +64,7 @@ export function Sidebar({ active, onChange }) {
           {theme === "dark" ? <Sun /> : <Moon />}
           {theme === "dark" ? "Light mode" : "Dark mode"}
         </button>
-        <div className="gr-profile-chip" style={{ width: "100%" }}>
+        <button className="gr-profile-chip" style={{ width: "100%" }} onClick={() => setShowCard(true)}>
           <div className="gr-avatar">
             {(profile.name || "You")
               .split(" ")
@@ -73,12 +77,14 @@ export function Sidebar({ active, onChange }) {
             <div className="name">{profile.name || "You"}</div>
             <div className="lvl">Lv. {levelInfo.level}</div>
           </div>
-        </div>
+        </button>
         <button className="gr-theme-toggle" onClick={() => signOut()}>
           <LogOut />
           Log out
         </button>
       </div>
+
+      <AnimatePresence>{showCard && <ProfileCard onClose={() => setShowCard(false)} />}</AnimatePresence>
     </aside>
   );
 }

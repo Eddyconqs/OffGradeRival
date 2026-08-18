@@ -453,6 +453,13 @@ button {
   border: 1px solid var(--border);
   padding: 7px 14px 7px 7px;
   border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.gr-profile-chip:hover {
+  border-color: var(--accent);
 }
 
 .gr-avatar {
@@ -1642,6 +1649,17 @@ a:focus-visible {
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   color: var(--text-muted);
+}
+
+button.gr-tag {
+  appearance: none;
+  background: none;
+  cursor: pointer;
+}
+
+button.gr-tag:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
 }
 
 .gr-whatif-banner {
@@ -3176,6 +3194,216 @@ a:focus-visible {
 
 .gr-comment-composer .gr-feed-gif-preview img {
   max-height: 160px;
+}
+
+/* ---------- Profile card (hockey-card-back modal) ---------- */
+
+.gr-profilecard-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 17, 31, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+  perspective: 1400px;
+}
+
+.gr-profilecard {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: min(680px, 90vh);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 2px solid var(--border-strong);
+  border-radius: 22px;
+  box-shadow: var(--shadow-elevated);
+  padding: 26px 26px 20px;
+}
+
+.gr-profilecard-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-elevated);
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.gr-profilecard-close:hover {
+  color: var(--danger-text);
+  border-color: var(--danger);
+}
+
+.gr-profilecard-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-right: 30px;
+}
+
+.gr-profilecard-name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 19px;
+}
+
+.gr-profilecard-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.gr-profilecard-badgerow {
+  margin-bottom: 18px;
+}
+
+.gr-profilecard-yearbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(160deg, var(--accent), #c75a1c);
+  color: #111827;
+  font-family: var(--stat);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.gr-profilecard-edit-hint {
+  opacity: 0.6;
+}
+
+.gr-profilecard-yearpick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gr-profilecard-yearpick label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.gr-profilecard-yearpick select {
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-family: var(--body);
+}
+
+.gr-profilecard-tablewrap {
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.gr-profilecard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.gr-profilecard-table thead th {
+  background: var(--surface-elevated);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.gr-profilecard-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gr-profilecard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.gr-profilecard-table tbody tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.gr-profilecard-term {
+  font-family: var(--mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.gr-profilecard-classname {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.gr-profilecard-grade {
+  font-family: var(--stat);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.gr-profilecard-tier {
+  width: 20px;
+}
+
+.gr-profilecard-tier .allstar {
+  color: var(--accent-text);
+}
+
+.gr-profilecard-tier .star {
+  color: var(--text-muted);
+}
+
+.gr-profilecard-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 18px 10px !important;
+}
+
+.gr-profilecard-footer {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.gr-profilecard-brand {
+  text-align: center;
+  font-family: var(--stat);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--border-strong);
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
 }
 
 @media (prefers-reduced-motion: reduce) {

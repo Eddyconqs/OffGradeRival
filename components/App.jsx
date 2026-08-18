@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { StoreProvider, useStore } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import { Sidebar, BottomNav, Fab } from "./Nav";
@@ -14,6 +15,7 @@ import Social from "./Social";
 import StudyHub from "./StudyHub";
 import Feed from "./Feed";
 import Files from "./Files";
+import ProfileCard from "./ProfileCard";
 
 function Toast() {
   const { toast } = useStore();
@@ -33,6 +35,7 @@ function initials(name) {
 
 function MobileTopbar() {
   const { profile, levelInfo, theme, toggleTheme } = useStore();
+  const [showCard, setShowCard] = useState(false);
   return (
     <div className="gr-topbar">
       <div className="gr-wordmark">
@@ -43,17 +46,18 @@ function MobileTopbar() {
         <button className="gr-theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === "dark" ? <Sun /> : <Moon />}
         </button>
-        <div className="gr-profile-chip">
+        <button className="gr-profile-chip" onClick={() => setShowCard(true)}>
           <div className="gr-avatar">{initials(profile.name || "You")}</div>
           <div>
             <div className="name">{profile.name}</div>
             <div className="lvl">Lv. {levelInfo.level}</div>
           </div>
-        </div>
+        </button>
         <button className="gr-theme-toggle" onClick={() => signOut()} aria-label="Log out">
           <LogOut />
         </button>
       </div>
+      <AnimatePresence>{showCard && <ProfileCard onClose={() => setShowCard(false)} />}</AnimatePresence>
     </div>
   );
 }

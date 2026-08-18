@@ -10,6 +10,7 @@ function NewClassForm({ onAdd }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [credits, setCredits] = useState(3);
+  const [term, setTerm] = useState("");
 
   if (!open) {
     return (
@@ -33,12 +34,17 @@ function NewClassForm({ onAdd }) {
           <label>Credits</label>
           <input type="number" min="1" max="6" value={credits} onChange={(e) => setCredits(e.target.value)} />
         </div>
+        <div className="gr-field" style={{ width: 140 }}>
+          <label>Term (optional)</label>
+          <input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Fall 2026" />
+        </div>
         <button
           className="gr-btn primary"
           disabled={!name.trim()}
           onClick={() => {
-            onAdd(name.trim(), PALETTE[Math.floor(Math.random() * PALETTE.length)], credits);
+            onAdd(name.trim(), PALETTE[Math.floor(Math.random() * PALETTE.length)], credits, term.trim());
             setName("");
+            setTerm("");
             setOpen(false);
           }}
         >
@@ -162,15 +168,29 @@ function WhatIf({ klass }) {
 }
 
 function ClassCard({ klass }) {
-  const { removeClass, addAssignment, removeAssignment, addCategory, updateCategoryWeight, removeCategory } =
-    useStore();
+  const {
+    removeClass,
+    addAssignment,
+    removeAssignment,
+    addCategory,
+    updateCategoryWeight,
+    updateClassTerm,
+    removeCategory,
+  } = useStore();
   const [showAddCat, setShowAddCat] = useState(false);
   const [catName, setCatName] = useState("");
   const [catWeight, setCatWeight] = useState(10);
+  const [editingTerm, setEditingTerm] = useState(false);
+  const [termDraft, setTermDraft] = useState(klass.term || "");
 
   const pct = computeClassPct(klass, []);
   const row = pct != null ? pctToLetterPoints(pct) : null;
   const totalWeight = klass.categories.reduce((s, c) => s + c.weight, 0);
+
+  const saveTerm = () => {
+    setEditingTerm(false);
+    if (termDraft.trim() !== (klass.term || "")) updateClassTerm(klass.id, termDraft.trim());
+  };
 
   return (
     <div className="gr-class">
@@ -179,6 +199,28 @@ function ClassCard({ klass }) {
           <span className="gr-swatch" style={{ background: klass.color }} />
           <h3>{klass.name}</h3>
           <span className="gr-tag">{klass.credits} cr</span>
+          {editingTerm ? (
+            <input
+              autoFocus
+              value={termDraft}
+              onChange={(e) => setTermDraft(e.target.value)}
+              onBlur={saveTerm}
+              onKeyDown={(e) => e.key === "Enter" && saveTerm()}
+              placeholder="Fall 2026"
+              style={{ width: 100, fontSize: 11 }}
+            />
+          ) : (
+            <button
+              className="gr-tag"
+              style={{ cursor: "pointer", background: "none" }}
+              onClick={() => {
+                setTermDraft(klass.term || "");
+                setEditingTerm(true);
+              }}
+            >
+              {klass.term || "+ term"}
+            </button>
+          )}
           {totalWeight !== 100 && (
             <span className="gr-tag" style={{ color: "var(--danger)", borderColor: "var(--danger)" }}>
               weights sum to {totalWeight}%
