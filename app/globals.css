@@ -3218,6 +3218,7 @@ button.gr-tag:hover {
   max-height: min(680px, 90vh);
   overflow-y: auto;
   background: var(--surface);
+  color: var(--text);
   border: 2px solid var(--border-strong);
   border-radius: 22px;
   box-shadow: var(--shadow-elevated);
